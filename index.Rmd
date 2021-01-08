@@ -28,6 +28,8 @@ library(plotly)
 library(todor)
 library(knitr)
 library(heatmaply)
+library(RcppRoll)
+library(gplots)
 ```
 
 
@@ -1257,7 +1259,7 @@ sarawak$incidence <- round((sarawak$cumsum /state_data_v2$population_new[state_d
 labuan$incidence <- round((labuan$cumsum /state_data_v2$population_new[state_data_v2$state=="W.P. Labuan"])*100000,2)
 
 #add 14-day incidence by states
-perlis$incidence14_rate <- round((perlis$incident14 /state_data_v2$population_new[state_data_v2$state=="Perlis"])*100000,2)
+perlis$incidence14_rate <- round((perlis$incident14/state_data_v2$population_new[state_data_v2$state=="Perlis"])*100000,2)
 kedah$incidence14_rate <- round((kedah$incident14 /state_data_v2$population_new[state_data_v2$state=="Kedah"])*100000,2)
 penang$incidence14_rate <- round((penang$incident14 /state_data_v2$population_new[state_data_v2$state=="Pulau Pinang"])*100000,2)
 perak$incidence14_rate <- round((perak$incident14 /state_data_v2$population_new[state_data_v2$state=="Perak"])*100000,2)
@@ -1359,6 +1361,124 @@ mas_state <- full_join(ts_mas, state_full, by=c("state","date","incidence","inci
 
 mas_state <- mas_state%>% filter(date>as.Date("2020-03-19"))
 
+```
+
+
+```{r, include=FALSE}
+#data set for incidence curves
+#change selected state spelling
+state$region[state$state=="Perlis"] <- 'Northern region'
+state$region[state$state=="Kedah"] <- 'Northern region'
+state$region[state$state=="Pulau Pinang"] <- 'Northern region'
+state$region[state$state=="Perak"] <- 'Northern region'
+state$region[state$state=="Selangor"] <- 'Central region'
+state$region[state$state=="Negeri Sembilan"] <- 'Southern region'
+state$region[state$state=="Melaka"] <- 'Southern region'
+state$region[state$state=="Johor"] <- 'Southern region'
+state$region[state$state=="Pahang"] <- 'Eastern region'
+state$region[state$state=="Terengganu"] <- "Eastern region"
+state$region[state$state=="Kelantan"] <- 'Eastern region'
+state$region[state$state=="Sabah"] <- 'Sabah & W.P. Labuan'
+state$region[state$state=="Sarawak"] <- 'Sarawak only'
+state$region[state$state=="W.P. Labuan"] <- 'Sabah & W.P. Labuan'
+state$region[state$state=="W.P. Kuala Lumpur"] <- "Central region"
+state$region[state$state=="W.P. Putrajaya"] <- 'Central region'
+
+#group by regions and sum up new region cases
+region <- state %>% select(date,region,new_cases,total_cases) %>% group_by(date,region) %>% summarise(new=sum(new_cases), total=sum(total_cases))
+colnames(region) <- c("date","location","new_cases", "total_cases")
+
+#add populations for all states
+#state populations
+#state populations
+johor1 <- 3764300
+kedah1	<- 2180600
+kelantan1 <- 1885700
+melaka1 <- 930700
+negeri1 <- 	1245700
+pahang1 <-1674600
+perak1 <- 2512100
+perlis1 <- 254000
+penang1 <- 1774600
+sabah1	<- 3903400
+sarawak1	<- 2812800
+selangor1	<- 6528400
+terengganu1	<- 1245700
+kl1	<- 1780700
+labuan1	<- 99300
+putrajaya1	<- 103800
+central <- selangor1+putrajaya1+kl1
+northern <- kedah1+perak1+perlis1+penang1
+eastern <- kelantan1+terengganu1+pahang1
+southern <- johor1+melaka1+negeri1
+sarawak1 <- sarawak1
+sabah2 <- sabah1+labuan1
+
+#add a total population column
+region$population <- NA
+region$population[region$location=="Central region"] <- central
+region$population[region$location=="Sarawak only"] <- sarawak1
+region$population[region$location=="Sabah & W.P. Labuan"] <- sabah2
+region$population[region$location=="Eastern region"] <- eastern
+region$population[region$location=="Northern region"] <- northern
+region$population[region$location=="Southern region"] <- southern
+state$population <- NA
+state$population[state$state=="Perlis"] <- perlis1
+state$population[state$state=="Kedah"] <- kedah1
+state$population[state$state=="Pulau Pinang"] <- penang1
+state$population[state$state=="Perak"] <- perak1
+state$population[state$state=="Selangor"] <- selangor1
+state$population[state$state=="Negeri Sembilan"] <- negeri1
+state$population[state$state=="Melaka"] <- melaka1
+state$population[state$state=="Johor"] <- johor1
+state$population[state$state=="Pahang"] <- pahang1
+state$population[state$state=="Terengganu"] <- terengganu1
+state$population[state$state=="Kelantan"] <- kelantan1
+state$population[state$state=="Sabah"] <- sabah1
+state$population[state$state=="Sarawak"] <- sarawak1
+state$population[state$state=="W.P. Labuan"] <- labuan1
+state$population[state$state=="W.P. Kuala Lumpur"] <- kl1
+state$population[state$state=="W.P. Putrajaya"] <- putrajaya1
+
+#calculate the 14-day sum of cases in all countries
+region<- region %>% group_by(location) %>% 
+  mutate(incident14=roll_sum(new_cases, 14,fill=NA, align="right"))
+
+state <- state %>% group_by(state) %>% 
+  mutate(incident14=roll_sum(new_cases, 14,fill=NA, align="right"))
+
+#calculate the 14 day incidence density per 100k for all states
+region <- region %>% group_by(date,location) %>% mutate(incident14_rate=round((incident14/population)*100000,2))
+region <- region %>% group_by(date,location) %>% mutate(incidence=round((total_cases/population)*100000,2))
+state <- state %>% group_by(date,state) %>% mutate(incident14_rate=round((incident14/population)*100000,2))
+state <- state %>% group_by(date,state) %>% mutate(incidence=round((total_cases/population)*100000,2))
+
+#select and combine
+#join state and region
+state_incidence <- as.data.frame(cbind(as.character(state$state), as.numeric(state$incidence), as.numeric(state$incident14_rate)))
+state_incidence$date <- as.Date(state$date)
+colnames(state_incidence) <- c("state","incidence","incidence14", "date")
+state_incidence$incidence2 <- NA
+state_incidence$incidence14_2 <- NA
+state_incidence$location <-  NA
+region_incidence <- as.data.frame(cbind(as.character(region$location), as.numeric(region$incidence), as.numeric(region$incident14_rate)))
+region_incidence$date <- as.Date(region$date)
+colnames(region_incidence) <- c("location","incidence2","incidence14_2","date")
+region_incidence$incidence <- NA
+region_incidence$incidence14 <- NA
+region_incidence$state <-  NA
+
+#combine state and region
+incidence_df <- rbind(region_incidence, state_incidence)
+
+#for some reason (likely the NAs) all numeric columns turn into characters
+incidence_df$incidence <- as.numeric(incidence_df$incidence)
+incidence_df$incidence2 <- as.numeric(incidence_df$incidence2)
+incidence_df$incidence14 <- as.numeric(incidence_df$incidence14)
+incidence_df$incidence14_2 <- as.numeric(incidence_df$incidence14_2)
+
+#division variable
+incidence_df <- incidence_df%>% mutate(group=ifelse(location %in% NA, "state", "region"))
 ```
 
 
@@ -1473,7 +1593,17 @@ mas_epid_curve <- ggplot(data=ts_mas,aes(x=date)) +
   scale_x_date(date_breaks = "2 week", date_minor_breaks = "1 day",
                date_labels = "%e %b", limits =c(as.Date(Sys.Date()-91),as.Date(Sys.Date()+1))) +
   labs(x = "Date", y="Cases")
-ggplotly(mas_epid_curve) %>%
+ggplotly(mas_epid_curve) %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      ))) %>%
   layout(title = list(text = paste0("Epidemic curve of COVID-19",
                                     '<br>',
                                     '<i>',
@@ -1516,7 +1646,17 @@ mas_epid_curve <- ggplot(data=ts_mas,aes(x=date)) +
   scale_x_date(date_breaks = "4 week", date_minor_breaks = "1 day",
                date_labels = "%e %b", limits =c(as.Date(Sys.Date()-91),as.Date(Sys.Date()+1))) +
   labs(x = "Date", y="Active cases")
-ggplotly(mas_epid_curve) %>%
+ggplotly(mas_epid_curve) %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      ))) %>%
   layout(title = list(text = paste0("Active COVID-19 cases",
                                     '<br>',
                                     '<i>',
@@ -1565,7 +1705,17 @@ perlis_epid_curve <- ggplot(data=perlis,aes(x=date)) +
   scale_x_date(date_breaks = "4 week", date_minor_breaks = "1 day",
                date_labels = "%e %b", limits =c(as.Date(Sys.Date()-91),as.Date(Sys.Date()+1))) +
   labs(x = "Date", y="Cases")
-ggplotly(perlis_epid_curve) %>%
+ggplotly(perlis_epid_curve) %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      ))) %>%
   layout(title = list(text = paste0("Epidemic curve of COVID-19",
                                     '<br>',
                                     '<i>',
@@ -1612,7 +1762,17 @@ kedah_epid_curve <- ggplot(data=kedah,aes(x=date)) +
   scale_x_date(date_breaks = "4 week", date_minor_breaks = "1 day",
                date_labels = "%e %b", limits =c(as.Date(Sys.Date()-91),as.Date(Sys.Date()+1))) +
   labs(x = "Date", y="Cases")
-ggplotly(kedah_epid_curve) %>%
+ggplotly(kedah_epid_curve) %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      ))) %>%
   layout(title = list(text = paste0("Epidemic curve of COVID-19",
                                     '<br>',
                                     '<i>',
@@ -1659,7 +1819,17 @@ penang_epid_curve <- ggplot(data=penang,aes(x=date)) +
   scale_x_date(date_breaks = "4 week", date_minor_breaks = "1 day",
                date_labels = "%e %b", limits =c(as.Date(Sys.Date()-91),as.Date(Sys.Date()+1))) +
   labs(x = "Date", y="Cases")
-ggplotly(penang_epid_curve) %>%
+ggplotly(penang_epid_curve) %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      ))) %>%
   layout(title = list(text = paste0("Epidemic curve of COVID-19",
                                     '<br>',
                                     '<i>',
@@ -1706,7 +1876,17 @@ perak_epid_curve <- ggplot(data=perak,aes(x=date)) +
   scale_x_date(date_breaks = "4 week", date_minor_breaks = "1 day",
                date_labels = "%e %b", limits =c(as.Date(Sys.Date()-91),as.Date(Sys.Date()+1))) +
   labs(x = "Date", y="Cases")
-ggplotly(perak_epid_curve) %>%
+ggplotly(perak_epid_curve) %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      ))) %>%
   layout(title = list(text = paste0("Epidemic curve of COVID-19",
                                     '<br>',
                                     '<i>',
@@ -1753,7 +1933,17 @@ selangor_epid_curve <- ggplot(data=selangor,aes(x=date)) +
   scale_x_date(date_breaks = "4 week", date_minor_breaks = "1 day",
                date_labels = "%e %b", limits =c(as.Date(Sys.Date()-91),as.Date(Sys.Date()+1))) +
   labs(x = "Date", y="Cases")
-ggplotly(selangor_epid_curve) %>%
+ggplotly(selangor_epid_curve) %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      ))) %>%
   layout(title = list(text = paste0("Epidemic curve of COVID-19",
                                     '<br>',
                                     '<i>',
@@ -1799,7 +1989,17 @@ kl_epid_curve <- ggplot(data=kl,aes(x=date)) +
   scale_x_date(date_breaks = "4 week", date_minor_breaks = "1 day",
                date_labels = "%e %b", limits =c(as.Date(Sys.Date()-91),as.Date(Sys.Date()+1))) +
   labs(x = "Date", y="Cases")
-ggplotly(kl_epid_curve) %>%
+ggplotly(kl_epid_curve) %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      ))) %>%
   layout(title = list(text = paste0("Epidemic curve of COVID-19",
                                     '<br>',
                                     '<i>',
@@ -1845,7 +2045,17 @@ putrajaya_epid_curve <- ggplot(data=putrajaya,aes(x=date)) +
   scale_x_date(date_breaks = "4 week", date_minor_breaks = "1 day",
                date_labels = "%e %b", limits =c(as.Date(Sys.Date()-91),as.Date(Sys.Date()+1))) +
   labs(x = "Date", y="Cases")
-ggplotly(putrajaya_epid_curve) %>%
+ggplotly(putrajaya_epid_curve) %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      ))) %>%
   layout(title = list(text = paste0("Epidemic curve of COVID-19",
                                     '<br>',
                                     '<i>',
@@ -1891,7 +2101,17 @@ melaka_epid_curve <- ggplot(data=melaka,aes(x=date)) +
   scale_x_date(date_breaks = "4 week", date_minor_breaks = "1 day",
                date_labels = "%e %b", limits =c(as.Date(Sys.Date()-91),as.Date(Sys.Date()+1))) +
   labs(x = "Date", y="Cases")
-ggplotly(melaka_epid_curve) %>%
+ggplotly(melaka_epid_curve) %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      ))) %>%
   layout(title = list(text = paste0("Epidemic curve of COVID-19",
                                     '<br>',
                                     '<i>',
@@ -1936,7 +2156,17 @@ negeri_epid_curve <- ggplot(data=negeri,aes(x=date)) +
   scale_x_date(date_breaks = "4 week", date_minor_breaks = "1 day",
                date_labels = "%e %b", limits =c(as.Date(Sys.Date()-91),as.Date(Sys.Date()+1))) +
   labs(x = "Date", y="Cases")
-ggplotly(negeri_epid_curve) %>%
+ggplotly(negeri_epid_curve) %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      ))) %>%
   layout(title = list(text = paste0("Epidemic curve of COVID-19",
                                     '<br>',
                                     '<i>',
@@ -1981,7 +2211,17 @@ johor_epid_curve <- ggplot(data=johor,aes(x=date)) +
   scale_x_date(date_breaks = "4 week", date_minor_breaks = "1 day",
                date_labels = "%e %b", limits =c(as.Date(Sys.Date()-91),as.Date(Sys.Date()+1))) +
   labs(x = "Date", y="Cases")
-ggplotly(johor_epid_curve) %>%
+ggplotly(johor_epid_curve) %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      ))) %>%
   layout(title = list(text = paste0("Epidemic curve of COVID-19",
                                     '<br>',
                                     '<i>',
@@ -2026,7 +2266,17 @@ pahang_epid_curve <- ggplot(data=pahang,aes(x=date)) +
   scale_x_date(date_breaks = "4 week", date_minor_breaks = "1 day",
                date_labels = "%e %b", limits =c(as.Date(Sys.Date()-91),as.Date(Sys.Date()+1))) +
   labs(x = "Date", y="Cases")
-ggplotly(pahang_epid_curve) %>%
+ggplotly(pahang_epid_curve) %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      ))) %>%
   layout(title = list(text = paste0("Epidemic curve of COVID-19",
                                     '<br>',
                                     '<i>',
@@ -2071,7 +2321,17 @@ terengganu_epid_curve <- ggplot(data=terengganu,aes(x=date)) +
   scale_x_date(date_breaks = "4 week", date_minor_breaks = "1 day",
                date_labels = "%e %b", limits =c(as.Date(Sys.Date()-91),as.Date(Sys.Date()+1))) +
   labs(x = "Date", y="Cases")
-ggplotly(terengganu_epid_curve) %>%
+ggplotly(terengganu_epid_curve)%>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      )))  %>%
   layout(title = list(text = paste0("Epidemic curve of COVID-19",
                                     '<br>',
                                     '<i>',
@@ -2116,7 +2376,17 @@ kelantan_epid_curve <- ggplot(data=kelantan,aes(x=date)) +
   scale_x_date(date_breaks = "4 week", date_minor_breaks = "1 day",
                date_labels = "%e %b", limits =c(as.Date(Sys.Date()-91),as.Date(Sys.Date()+1))) +
   labs(x = "Date", y="Cases")
-ggplotly(kelantan_epid_curve) %>%
+ggplotly(kelantan_epid_curve)%>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      )))  %>%
   layout(title = list(text = paste0("Epidemic curve of COVID-19",
                                     '<br>',
                                     '<i>',
@@ -2161,7 +2431,17 @@ sarawak_epid_curve <- ggplot(data=sarawak,aes(x=date)) +
   scale_x_date(date_breaks = "4 week", date_minor_breaks = "1 day",
                date_labels = "%e %b", limits =c(as.Date(Sys.Date()-91),as.Date(Sys.Date()+1))) +
   labs(x = "Date", y="Cases")
-ggplotly(sarawak_epid_curve) %>%
+ggplotly(sarawak_epid_curve)%>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      )))  %>%
   layout(title = list(text = paste0("Epidemic curve of COVID-19",
                                     '<br>',
                                     '<i>',
@@ -2206,7 +2486,17 @@ sabah_epid_curve <- ggplot(data=sabah,aes(x=date)) +
   scale_x_date(date_breaks = "4 week", date_minor_breaks = "1 day",
                date_labels = "%e %b", limits =c(as.Date(Sys.Date()-91),as.Date(Sys.Date()+1))) +
   labs(x = "Date", y="Cases")
-ggplotly(sabah_epid_curve) %>%
+ggplotly(sabah_epid_curve)%>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      )))  %>%
   layout(title = list(text = paste0("Epidemic curve of COVID-19",
                                     '<br>',
                                     '<i>',
@@ -2251,7 +2541,17 @@ labuan_epid_curve <- ggplot(data=labuan,aes(x=date)) +
   scale_x_date(date_breaks = "4 week", date_minor_breaks = "1 day",
                date_labels = "%e %b", limits =c(as.Date(Sys.Date()-91),as.Date(Sys.Date()+1))) +
   labs(x = "Date", y="Cases")
-ggplotly(labuan_epid_curve) %>%
+ggplotly(labuan_epid_curve)%>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      )))  %>%
   layout(title = list(text = paste0("Epidemic curve of COVID-19",
                                     '<br>',
                                     '<i>',
@@ -2272,136 +2572,119 @@ Cols {.tabset}
 -------------------------------------
 ### Cumulative incidence
 ```{r}
-#length of colours to set by location
-colourCount = length(unique(mas_state$state))
-getPalette = colorRampPalette(brewer.pal(9, "Set1"))
-
-#order the locations
-mas_state$state <- factor(mas_state$state, levels = c("Malaysia", "Sabah","W.P. Labuan","Sarawak","Selangor","W.P. Kuala Lumpur","W.P. Putrajaya",
-                                                      "Perak","Pulau Pinang","Kedah","Perlis","Johor","Negeri Sembilan","Melaka",
-                                                      "Pahang","Kelantan","Terengganu"))
-mas_state <-  mas_state %>% mutate(lines =ifelse(state %in% c("Sabah","Sarawak","W.P. Kuala Lumpur","Pulau Pinang", "Perlis","Negeri Sembilan","Kelantan"),"dashed", "solid"))
-
-#plot the incidence curve
-mas_inc_curve <- ggplot(data=mas_state) +
-  geom_line(aes(x=date, y=incidence, col=state), size=1.05) +
- scale_colour_manual(values=c("blue",
-                               "steelblue1", "darkgreen", 
-                               "springgreen4",
-                               "seagreen1",
-                               "mediumvioletred",
-                               "gold2", "darkorange",
-                               "darkorchid4","lightpink1",
-                               "firebrick3",
-                               "darkcyan",
-                               "lightblue",
-                               "lightcoral",
-                              "dimgray", "grey17","deeppink1"
-  ))+
-  theme_minimal() +
-  theme(legend.position = c(.95, .5),
-        legend.justification = c("right", "top"),
-        legend.box.just = "right",
-        legend.box.background=element_rect(color = "transparent"),
-        legend.background=element_rect(color = "transparent"),
-        legend.margin = margin(6, 6, 6, 6),
-        panel.grid.major.x=element_blank(),
-        plot.title = element_text(size=12),
-        axis.ticks.x = element_line(color = "grey40", 
-                                    size = 1, linetype = "solid"),
-        axis.ticks.y = element_line(color = "grey40", 
-                                    size = 1, linetype = "solid"),
-        axis.title.x = element_text(size=10),
-        axis.title.y=element_text(size=10),
-        axis.title = element_text(size=10)) +
-  scale_x_date(date_breaks = "2 week", date_minor_breaks = "1 day",
-               date_labels = "%e %b", limits =c(as.Date(Sys.Date()-91),as.Date(Sys.Date()+1))) +
-  scale_y_continuous(trans = "log10", limits = c(1,10000), breaks = c(1,10,100,1000,10000)) +
-  labs(x = "Date", y=paste0("Cumulative Incidence density",
-                                    '<br>',
-                                    "(per 100,000 population)"), 
-       col="State") 
-
-ggplotly(mas_inc_curve) %>%
-  layout(title = list(text = paste0("Cumulative Incidence of COVID-19 cases",
-                                    '<br>',
-                                    '<i>',
-                                    'Malaysia: National and State Level',
-                                    '</i>'))) %>% 
+mas_inc_curve <- plot_ly() %>%
+  add_lines(data=incidence_df %>% filter(group=="state"), x=~date,y = ~incidence, name=~state, color=~state,
+            colors=c("#0000FF", "#63B8FF", "#006400", "#008B45", "#54FF9F", "#C71585", "#EEC900", "#FF8C00", "#68228B", "#FFAEB9", "#CD2626", "#008B8B", "#ADD8E6",
+                      "#F08080", "#696969", "#2B2B2B", "#FF1493"))%>%
+  add_lines(data=incidence_df %>% filter(group=="region"), x=~date,y = ~incidence2, name=~location, color=~location, 
+            colors=c("#CD2626", "#008B45", "#63B8FF", "#2B2B2B", "#FFAEB9", "#EEC900"), visible=FALSE)%>% 
+  layout(title = paste0("Cumulative Incidence of COVID-19 cases",
+                 '<br>',
+                 '<i>',
+                 'Malaysia: National and State Level',
+                 '</i>'),
+  xaxis = list(title = "Date", domain = c(0.2, 1)),
+  yaxis = list(title = paste0("Cumulative Incidence density",
+                              '<br>',
+                              "(per 100,000 population)")),
+  updatemenus = list(
+    list(
+      y = 0.8, x=0.1,
+      buttons = list(
+        list(method = "restyle",
+             args = list("visible", list(TRUE, TRUE, TRUE, TRUE,TRUE, TRUE, TRUE, TRUE,TRUE, TRUE, TRUE, TRUE,TRUE, TRUE, TRUE, TRUE,
+                                         FALSE,FALSE,FALSE,FALSE,FALSE,FALSE)),
+             label = "State"),
+        
+        list(method = "restyle",
+             args = list("visible", list(FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,
+                                         TRUE, TRUE, TRUE, TRUE,TRUE, TRUE)),
+             label = "Regional"))))) %>% 
+  layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.2,
+           sizey = 0.2,
+           opacity = 1.1
+      )))  %>%
+  layout(yaxis = list(type = "log", range=c(-0.01,3.5),
+                      tickvals = as.list(c(1,10,100,1000)))) %>% 
   layout(titlefont=list(size=12)) %>%
   config(modeBarButtonsToRemove = c("zoomIn2d", "zoomOut2d", "autoScale2d", "resetScale2d", "hoverClosestCartesian", "hoverCompareCartesian","lasso2d", "select2d", "pan2d","zoom2d")) %>%
   layout(xaxis=list(fixedrange=TRUE)) %>% layout(yaxis=list(fixedrange=TRUE)) %>%
-  config(displaylogo = FALSE) %>%
-  layout(legend = l) %>%
+  config(displaylogo = FALSE)  %>%
     layout(
         xaxis = list(titlefont = list(size = 12)), 
-        yaxis = list(titlefont = list(size = 8)))
-
+        yaxis = list(titlefont = list(size = 8))) %>%  
+  layout(titlefont=list(size=12),
+         xaxis = list(title="Date",
+                      range = 
+            c(as.numeric(as.POSIXct((Sys.Date()-91), format="%Y-%m-%d"))*1000,
+              as.numeric(as.POSIXct(Sys.Date(), format="%Y-%m-%d"))*1000)))
+mas_inc_curve
 ```
+
 
 ### 14 day incidence density
 ```{r}
-#length of colours to set by location
-colourCount = length(unique(mas_state$state))
-getPalette = colorRampPalette(brewer.pal(9, "Set1"))
-
-#order the locations
-mas_state$state <- factor(mas_state$state, levels = c("Malaysia", "Sabah","W.P. Labuan","Sarawak","Selangor","W.P. Kuala Lumpur","W.P. Putrajaya",
-                                                      "Perak","Pulau Pinang","Kedah","Perlis","Johor","Negeri Sembilan","Melaka",
-                                                      "Pahang","Kelantan","Terengganu"))
-
-#plot the incidence curve
-mas_den_curve <- ggplot(data=mas_state) +
-  geom_line(aes(x=date, y=incidence14_rate, col=state), size=1.05) +
- scale_colour_manual(values=c("blue",
-                               "steelblue1", "darkgreen", 
-                               "springgreen4",
-                               "seagreen1",
-                               "mediumvioletred",
-                               "gold2", "darkorange",
-                               "darkorchid4","lightpink1",
-                               "firebrick3",
-                               "darkcyan",
-                               "lightblue",
-                               "lightcoral",
-                              "dimgray", "grey17","deeppink1"
-  ))+
-  theme_minimal() +
-  theme(legend.position = c(.95, .5),
-        legend.justification = c("right", "top"),
-        legend.box.just = "right",
-        legend.box.background=element_rect(color = "transparent"),
-        legend.background=element_rect(color = "transparent"),
-        legend.margin = margin(6, 6, 6, 6),
-        panel.grid.major.x=element_blank(),
-        plot.title = element_text(size=12),
-        axis.ticks.x = element_line(color = "grey40", 
-                                    size = 1, linetype = "solid"),
-        axis.ticks.y = element_line(color = "grey40", 
-                                    size = 1, linetype = "solid"),
-        axis.title.x = element_text(size=10),
-        axis.title.y=element_text(size=10),
-        axis.title = element_text(size=10)) +
-  scale_x_date(date_breaks = "2 week", date_minor_breaks = "1 day",
-               date_labels = "%e %b", limits =c(as.Date(Sys.Date()-91),as.Date(Sys.Date()+1))) +
-  scale_y_continuous(trans = "log10", limits = c(0.1,10000), breaks = c(0,1,10,100,1000,10000)) +
-  labs(x = "Date", y=paste0("Incidence density",
-                                    '<br>',
-                                    "(per 100,000 population)"), col="State")
-ggplotly(mas_den_curve) %>%
-  layout(title = list(text = paste0("14-day Incidence density of COVID-19 cases",
-                                    '<br>',
-                                    '<i>',
-                                    'Malaysia: National and State Level',
-                                    '</i>'))) %>%
+mas_inc_curve <- plot_ly() %>%
+  add_lines(data=incidence_df %>% filter(group=="state"), x=~date,y = ~incidence14, name=~state, color=~state,
+            colors=c("#0000FF", "#63B8FF", "#006400", "#008B45", "#54FF9F", "#C71585", "#EEC900", "#FF8C00", "#68228B", "#FFAEB9", "#CD2626", "#008B8B", "#ADD8E6",
+                      "#F08080", "#696969", "#2B2B2B", "#FF1493"))%>%
+  add_lines(data=incidence_df %>% filter(group=="region"), x=~date,y = ~incidence14_2, name=~location, color=~location, 
+            colors=c("#CD2626", "#008B45", "#63B8FF", "#2B2B2B", "#FFAEB9", "#EEC900"), visible=FALSE)%>% 
+  layout(title = paste0("14-day incidence density of COVID-19 cases",
+                 '<br>',
+                 '<i>',
+                 'Malaysia: National and State Level',
+                 '</i>'),
+  xaxis = list(title = "Date", domain = c(0.2, 1)),
+  yaxis = list(title = paste0("Incidence density",
+                              '<br>',
+                              "(per 100,000 population)")),
+  updatemenus = list(
+    list(
+      y = 0.8, x=0.1,
+      buttons = list(
+        list(method = "restyle",
+             args = list("visible", list(TRUE, TRUE, TRUE, TRUE,TRUE, TRUE, TRUE, TRUE,TRUE, TRUE, TRUE, TRUE,TRUE, TRUE, TRUE, TRUE,
+                                         FALSE,FALSE,FALSE,FALSE,FALSE,FALSE)),
+             label = "State"),
+        
+        list(method = "restyle",
+             args = list("visible", list(FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,
+                                         TRUE, TRUE, TRUE, TRUE,TRUE, TRUE)),
+             label = "Regional"))))) %>% 
+  layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.2,
+           sizey = 0.2,
+           opacity = 1.1
+      )))  %>%
+  layout(yaxis = list(type = "log",  range=c(-0.01,3.5),
+                      tickvals = as.list(c(0.8,1,10,100,1000)))) %>% 
   layout(titlefont=list(size=12)) %>%
   config(modeBarButtonsToRemove = c("zoomIn2d", "zoomOut2d", "autoScale2d", "resetScale2d", "hoverClosestCartesian", "hoverCompareCartesian","lasso2d", "select2d", "pan2d","zoom2d")) %>%
   layout(xaxis=list(fixedrange=TRUE)) %>% layout(yaxis=list(fixedrange=TRUE)) %>%
-  config(displaylogo = FALSE) %>% 
-  layout(legend = l) %>%
+  config(displaylogo = FALSE)  %>%
     layout(
         xaxis = list(titlefont = list(size = 12)), 
-        yaxis = list(titlefont = list(size = 8)))
+        yaxis = list(titlefont = list(size = 8))) %>%  
+  layout(titlefont=list(size=12),
+         xaxis = list(title="Date",
+                      range = 
+            c(as.numeric(as.POSIXct((Sys.Date()-91), format="%Y-%m-%d"))*1000,
+              as.numeric(as.POSIXct(Sys.Date(), format="%Y-%m-%d"))*1000))) 
+mas_inc_curve
 ```
 
 
@@ -2460,7 +2743,17 @@ mas_cap_curve <- ggplot(data=ts_mas,aes(x=date)) +
   scale_x_date(date_breaks = "4 week", date_minor_breaks = "1 day",
                date_labels = "%e %b", limits =c(as.Date(Sys.Date()-91),as.Date(Sys.Date()+1))) +
   labs(x = "Date", y="Utilisation (%)")
-ggplotly(mas_cap_curve) %>%
+ggplotly(mas_cap_curve)%>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.1,
+           sizey = 0.1,
+           opacity = 1.1
+      )))  %>%
   layout(title = list(text = paste0("COVID-19 cases and Healthcare capacity",
                                     '<br>',
                                     '<i>',
@@ -2528,7 +2821,17 @@ perlis_bed_curve <- plot_ly(perlis, x = ~date, y = ~bed_perc9, type = 'scatter',
       xanchor='right', yanchor='auto', xshift=0, yshift=-30,
       font=list(size=7, color="black")))
 
-perlis_bed_curve%>%
+perlis_bed_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.2,
+           sizey = 0.2,
+           opacity = 1.1
+      ))) %>%
   layout(xaxis = list(autorange = TRUE)) %>%
   config(modeBarButtonsToRemove = c("zoomIn2d", "zoomOut2d", "autoScale2d", "resetScale2d", "hoverClosestCartesian", "hoverCompareCartesian","lasso2d", "select2d", "pan2d","zoom2d")) %>%
   layout(xaxis=list(fixedrange=TRUE)) %>% layout(yaxis=list(fixedrange=TRUE)) %>%
@@ -2583,7 +2886,17 @@ kedah_bed_curve <- plot_ly(kedah, x = ~date, y = ~bed_perc9, type = 'scatter', m
       xanchor='right', yanchor='auto', xshift=0, yshift=-30,
       font=list(size=7, color="black")))
 
-kedah_bed_curve%>%
+kedah_bed_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.2,
+           sizey = 0.2,
+           opacity = 1.1
+      ))) %>%
   layout(xaxis = list(autorange = TRUE)) %>%
   config(modeBarButtonsToRemove = c("zoomIn2d", "zoomOut2d", "autoScale2d", "resetScale2d", "hoverClosestCartesian", "hoverCompareCartesian","lasso2d", "select2d", "pan2d","zoom2d")) %>%
   layout(xaxis=list(fixedrange=TRUE)) %>% layout(yaxis=list(fixedrange=TRUE)) %>%
@@ -2638,7 +2951,17 @@ penang_bed_curve <- plot_ly(penang, x = ~date, y = ~bed_perc9, type = 'scatter',
       xanchor='right', yanchor='auto', xshift=0, yshift=-30,
       font=list(size=7, color="black")))
 
-penang_bed_curve%>%
+penang_bed_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.2,
+           sizey = 0.2,
+           opacity = 1.1
+      ))) %>%
   layout(xaxis = list(autorange = TRUE)) %>%
   config(modeBarButtonsToRemove = c("zoomIn2d", "zoomOut2d", "autoScale2d", "resetScale2d", "hoverClosestCartesian", "hoverCompareCartesian","lasso2d", "select2d", "pan2d","zoom2d")) %>%
   layout(xaxis=list(fixedrange=TRUE)) %>% layout(yaxis=list(fixedrange=TRUE)) %>%
@@ -2693,7 +3016,17 @@ perak_bed_curve <- plot_ly(perak, x = ~date, y = ~bed_perc9, type = 'scatter', m
       xanchor='right', yanchor='auto', xshift=0, yshift=-30,
       font=list(size=7, color="black")))
 
-perak_bed_curve%>%
+perak_bed_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.2,
+           sizey = 0.2,
+           opacity = 1.1
+      ))) %>%
   layout(xaxis = list(autorange = TRUE)) %>%
   config(modeBarButtonsToRemove = c("zoomIn2d", "zoomOut2d", "autoScale2d", "resetScale2d", "hoverClosestCartesian", "hoverCompareCartesian","lasso2d", "select2d", "pan2d","zoom2d")) %>%
   layout(xaxis=list(fixedrange=TRUE)) %>% layout(yaxis=list(fixedrange=TRUE)) %>%
@@ -2748,7 +3081,17 @@ selangor_bed_curve <- plot_ly(selangor, x = ~date, y = ~bed_perc9, type = 'scatt
       xanchor='right', yanchor='auto', xshift=0, yshift=-30,
       font=list(size=7, color="black")))
 
-selangor_bed_curve%>%
+selangor_bed_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.2,
+           sizey = 0.2,
+           opacity = 1.1
+      ))) %>%
   layout(xaxis = list(autorange = TRUE)) %>%
   config(modeBarButtonsToRemove = c("zoomIn2d", "zoomOut2d", "autoScale2d", "resetScale2d", "hoverClosestCartesian", "hoverCompareCartesian","lasso2d", "select2d", "pan2d","zoom2d")) %>%
   layout(xaxis=list(fixedrange=TRUE)) %>% layout(yaxis=list(fixedrange=TRUE)) %>%
@@ -2802,7 +3145,17 @@ kl_bed_curve <- plot_ly(kl, x = ~date, y = ~bed_perc9, type = 'scatter', mode = 
       xanchor='right', yanchor='auto', xshift=0, yshift=-30,
       font=list(size=7, color="black")))
 
-kl_bed_curve %>%
+kl_bed_curve  %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.2,
+           sizey = 0.2,
+           opacity = 1.1
+      ))) %>%
   layout(xaxis = list(autorange = TRUE)) %>%
   config(modeBarButtonsToRemove = c("zoomIn2d", "zoomOut2d", "autoScale2d", "resetScale2d", "hoverClosestCartesian", "hoverCompareCartesian","lasso2d", "select2d", "pan2d","zoom2d")) %>%
   layout(xaxis=list(fixedrange=TRUE)) %>% layout(yaxis=list(fixedrange=TRUE)) %>%
@@ -2857,7 +3210,17 @@ putrajaya_bed_curve <- plot_ly(putrajaya,x = ~date, y = ~bed_perc9, type = 'scat
       xanchor='right', yanchor='auto', xshift=0, yshift=-30,
       font=list(size=7, color="black")))
 
-putrajaya_bed_curve %>%
+putrajaya_bed_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.2,
+           sizey = 0.2,
+           opacity = 1.1
+      )))  %>%
   layout(xaxis = list(autorange = TRUE)) %>%
   config(modeBarButtonsToRemove = c("zoomIn2d", "zoomOut2d", "autoScale2d", "resetScale2d", "hoverClosestCartesian", "hoverCompareCartesian","lasso2d", "select2d", "pan2d","zoom2d")) %>%
   layout(xaxis=list(fixedrange=TRUE)) %>% layout(yaxis=list(fixedrange=TRUE)) %>%
@@ -2911,7 +3274,17 @@ negeri_bed_curve <- plot_ly(negeri, x = ~date, y = ~bed_perc9, type = 'scatter',
       xanchor='right', yanchor='auto', xshift=0, yshift=-30,
       font=list(size=7, color="black")))
 
-negeri_bed_curve %>%
+negeri_bed_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.2,
+           sizey = 0.2,
+           opacity = 1.1
+      )))  %>%
   layout(xaxis = list(autorange = TRUE)) %>%
   config(modeBarButtonsToRemove = c("zoomIn2d", "zoomOut2d", "autoScale2d", "resetScale2d", "hoverClosestCartesian", "hoverCompareCartesian","lasso2d", "select2d", "pan2d","zoom2d")) %>%
   layout(xaxis=list(fixedrange=TRUE)) %>% layout(yaxis=list(fixedrange=TRUE)) %>%
@@ -2965,7 +3338,17 @@ melaka_bed_curve <- plot_ly(melaka, x = ~date, y = ~bed_perc9, type = 'scatter',
       xanchor='right', yanchor='auto', xshift=0, yshift=-30,
       font=list(size=7, color="black")))
  
-melaka_bed_curve %>%
+melaka_bed_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.2,
+           sizey = 0.2,
+           opacity = 1.1
+      ))) %>%
   layout(xaxis = list(autorange = TRUE)) %>%
   config(modeBarButtonsToRemove = c("zoomIn2d", "zoomOut2d", "autoScale2d", "resetScale2d", "hoverClosestCartesian", "hoverCompareCartesian","lasso2d", "select2d", "pan2d","zoom2d")) %>%
   layout(xaxis=list(fixedrange=TRUE)) %>% layout(yaxis=list(fixedrange=TRUE)) %>%
@@ -3019,7 +3402,17 @@ johor_bed_curve <- plot_ly(johor, x = ~date, y = ~bed_perc9, type = 'scatter', m
       xanchor='right', yanchor='auto', xshift=0, yshift=-30,
       font=list(size=7, color="black")))
 
-johor_bed_curve %>%
+johor_bed_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.2,
+           sizey = 0.2,
+           opacity = 1.1
+      ))) %>%
   layout(xaxis = list(autorange = TRUE)) %>%
   config(modeBarButtonsToRemove = c("zoomIn2d", "zoomOut2d", "autoScale2d", "resetScale2d", "hoverClosestCartesian", "hoverCompareCartesian","lasso2d", "select2d", "pan2d","zoom2d")) %>%
   layout(xaxis=list(fixedrange=TRUE)) %>% layout(yaxis=list(fixedrange=TRUE)) %>%
@@ -3073,7 +3466,17 @@ pahang_bed_curve <- plot_ly(pahang, x = ~date, y = ~bed_perc9, type = 'scatter',
       xanchor='right', yanchor='auto', xshift=0, yshift=-30,
       font=list(size=7, color="black")))
 
-pahang_bed_curve %>%
+pahang_bed_curve%>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.2,
+           sizey = 0.2,
+           opacity = 1.1
+      )))  %>%
   layout(xaxis = list(autorange = TRUE)) %>%
   config(modeBarButtonsToRemove = c("zoomIn2d", "zoomOut2d", "autoScale2d", "resetScale2d", "hoverClosestCartesian", "hoverCompareCartesian","lasso2d", "select2d", "pan2d","zoom2d")) %>%
   layout(xaxis=list(fixedrange=TRUE)) %>% layout(yaxis=list(fixedrange=TRUE)) %>%
@@ -3127,7 +3530,17 @@ terengganu_bed_curve <- plot_ly(pahang,x = ~date, y = ~bed_perc9, type = 'scatte
       xanchor='right', yanchor='auto', xshift=0, yshift=-30,
       font=list(size=7, color="black")))
 
-terengganu_bed_curve%>%
+terengganu_bed_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.2,
+           sizey = 0.2,
+           opacity = 1.1
+      ))) %>%
   layout(xaxis = list(autorange = TRUE)) %>%
   config(modeBarButtonsToRemove = c("zoomIn2d", "zoomOut2d", "autoScale2d", "resetScale2d", "hoverClosestCartesian", "hoverCompareCartesian","lasso2d", "select2d", "pan2d","zoom2d")) %>%
   layout(xaxis=list(fixedrange=TRUE)) %>% layout(yaxis=list(fixedrange=TRUE)) %>%
@@ -3181,7 +3594,17 @@ kelantan_bed_curve <- plot_ly(kelantan, x = ~date, y = ~bed_perc9, type = 'scatt
       xanchor='right', yanchor='auto', xshift=0, yshift=-30,
       font=list(size=7, color="black")))
 
-kelantan_bed_curve %>%
+kelantan_bed_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.2,
+           sizey = 0.2,
+           opacity = 1.1
+      )))  %>%
   layout(xaxis = list(autorange = TRUE)) %>%
   config(modeBarButtonsToRemove = c("zoomIn2d", "zoomOut2d", "autoScale2d", "resetScale2d", "hoverClosestCartesian", "hoverCompareCartesian","lasso2d", "select2d", "pan2d","zoom2d")) %>%
   layout(xaxis=list(fixedrange=TRUE)) %>% layout(yaxis=list(fixedrange=TRUE)) %>%
@@ -3235,7 +3658,17 @@ sarawak_bed_curve <- plot_ly(sarawak, x = ~date, y = ~bed_perc9, type = 'scatter
       xanchor='right', yanchor='auto', xshift=0, yshift=-30,
       font=list(size=7, color="black")))
 
-sarawak_bed_curve %>%
+sarawak_bed_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.2,
+           sizey = 0.2,
+           opacity = 1.1
+      ))) %>%
   layout(xaxis = list(autorange = TRUE)) %>%
   config(modeBarButtonsToRemove = c("zoomIn2d", "zoomOut2d", "autoScale2d", "resetScale2d", "hoverClosestCartesian", "hoverCompareCartesian","lasso2d", "select2d", "pan2d","zoom2d")) %>%
   layout(xaxis=list(fixedrange=TRUE)) %>% layout(yaxis=list(fixedrange=TRUE)) %>%
@@ -3288,7 +3721,17 @@ sabah_bed_curve <- plot_ly(sabah, x = ~date, y = ~bed_perc9, type = 'scatter', m
       showarrow = F, xref='paper', yref='paper', 
       xanchor='right', yanchor='auto', xshift=0, yshift=-30,
       font=list(size=7, color="black")))
-sabah_bed_curve%>%
+sabah_bed_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.2,
+           sizey = 0.2,
+           opacity = 1.1
+      ))) %>%
   layout(xaxis = list(autorange = TRUE)) %>%
   config(modeBarButtonsToRemove = c("zoomIn2d", "zoomOut2d", "autoScale2d", "resetScale2d", "hoverClosestCartesian", "hoverCompareCartesian","lasso2d", "select2d", "pan2d","zoom2d")) %>%
   layout(xaxis=list(fixedrange=TRUE)) %>% layout(yaxis=list(fixedrange=TRUE)) %>%
@@ -3342,7 +3785,17 @@ labuan_bed_curve <- plot_ly(labuan, x = ~date, y = ~bed_perc9, type = 'scatter',
       xanchor='right', yanchor='auto', xshift=0, yshift=-30,
       font=list(size=7, color="black")))
 
-labuan_bed_curve%>%
+labuan_bed_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.2,
+           sizey = 0.2,
+           opacity = 1.1
+      ))) %>%
   layout(xaxis = list(autorange = TRUE)) %>%
   config(modeBarButtonsToRemove = c("zoomIn2d", "zoomOut2d", "autoScale2d", "resetScale2d", "hoverClosestCartesian", "hoverCompareCartesian","lasso2d", "select2d", "pan2d","zoom2d")) %>%
   layout(xaxis=list(fixedrange=TRUE)) %>% layout(yaxis=list(fixedrange=TRUE)) %>%
@@ -3444,7 +3897,17 @@ mas_trans_curve <- plot_ly() %>%
                                     '<i>',
                                     "Malaysia",
                                     '</i>')))  
-mas_trans_curve %>%
+mas_trans_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      )))  %>%
   layout(xaxis = list(autorange = TRUE)) %>% 
   layout(yaxis2 = list(type = "log",
                       tickvals = as.list(c(seq(0.2,1,0.2), seq(2,8,2))))) %>%
@@ -3497,7 +3960,17 @@ perlis_trans_curve <- plot_ly() %>%
                                     "Perlis",
                                     '</i>')))
 
-perlis_trans_curve %>%
+perlis_trans_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      ))) %>%
   layout(xaxis = list(autorange = TRUE)) %>% 
   layout(yaxis2 = list(type = "log",
                       tickvals = as.list(c(seq(0.2,1,0.2), seq(2,8,2))))) %>%
@@ -3547,7 +4020,17 @@ kedah_trans_curve <- plot_ly() %>%
                                     "Kedah",
                                     '</i>')))
 
-kedah_trans_curve %>%
+kedah_trans_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      )))  %>%
   layout(xaxis = list(autorange = TRUE)) %>% 
   layout(yaxis2 = list(type = "log",
                       tickvals = as.list(c(seq(0.2,1,0.2), seq(2,8,2))))) %>%
@@ -3596,7 +4079,17 @@ penang_trans_curve <- plot_ly() %>%
                                     "Pulau Pinang",
                                     '</i>')))
 
-penang_trans_curve %>%
+penang_trans_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      )))  %>%
   layout(xaxis = list(autorange = TRUE))%>% 
   layout(yaxis2 = list(type = "log",
                       tickvals = as.list(c(seq(0.2,1,0.2), seq(2,8,2))))) %>%
@@ -3644,7 +4137,17 @@ perak_trans_curve <- plot_ly() %>%
                                     "Perak",
                                     '</i>')))
 
-perak_trans_curve %>%
+perak_trans_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      )))  %>%
   layout(xaxis = list(autorange = TRUE)) %>% 
   layout(yaxis2 = list(type = "log",
                       tickvals = as.list(c(seq(0.2,1,0.2), seq(2,8,2))))) %>%
@@ -3692,7 +4195,17 @@ selangor_trans_curve <- plot_ly() %>%
                                     "Selangor",
                                     '</i>')))
 
-selangor_trans_curve%>%
+selangor_trans_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      ))) %>%
   layout(xaxis = list(autorange = TRUE)) %>% 
   layout(yaxis2 = list(type = "log",
                       tickvals = as.list(c(seq(0.2,1,0.2), seq(2,8,2))))) %>%
@@ -3740,7 +4253,17 @@ kl_trans_curve <- plot_ly() %>%
                                     "W.P. Kuala Lumpur",
                                     '</i>')))
 
-kl_trans_curve%>%
+kl_trans_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      ))) %>%
   layout(xaxis = list(autorange = TRUE)) %>% 
   layout(yaxis2 = list(type = "log",
                       tickvals = as.list(c(seq(0.2,1,0.2), seq(2,8,2))))) %>%
@@ -3788,7 +4311,17 @@ putrajaya_trans_curve <- plot_ly() %>%
                                     "W.P. Putrajaya",
                                     '</i>')))
 
-putrajaya_trans_curve%>%
+putrajaya_trans_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      ))) %>%
   layout(xaxis = list(autorange = TRUE)) %>% 
   layout(yaxis2 = list(type = "log",
                       tickvals = as.list(c(seq(0.2,1,0.2), seq(2,8,2))))) %>%
@@ -3836,7 +4369,17 @@ melaka_trans_curve <- plot_ly() %>%
                                     "Melaka",
                                     '</i>')))
 
-melaka_trans_curve %>%
+melaka_trans_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      ))) %>%
   layout(xaxis = list(autorange = TRUE)) %>% 
   layout(yaxis2 = list(type = "log",
                       tickvals = as.list(c(seq(0.2,1,0.2), seq(2,8,2))))) %>%
@@ -3884,7 +4427,17 @@ negeri_trans_curve <- plot_ly() %>%
                                     "Negeri Sembilan",
                                     '</i>')))
 
-negeri_trans_curve %>%
+negeri_trans_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      )))  %>%
   layout(xaxis = list(autorange = TRUE)) %>% 
   layout(yaxis2 = list(type = "log",
                       tickvals = as.list(c(seq(0.2,1,0.2), seq(2,8,2))))) %>%
@@ -3932,7 +4485,17 @@ johor_trans_curve <- plot_ly() %>%
                                     "Johor",
                                     '</i>')))
 
-johor_trans_curve %>%
+johor_trans_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      )))  %>%
   layout(xaxis = list(autorange = TRUE)) %>% 
   layout(yaxis2 = list(type = "log",
                       tickvals = as.list(c(seq(0.2,1,0.2), seq(2,8,2))))) %>%
@@ -3980,7 +4543,17 @@ pahang_trans_curve <- plot_ly() %>%
                                     "Pahang",
                                     '</i>')))
 
-pahang_trans_curve %>%
+pahang_trans_curve%>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      )))  %>%
   layout(xaxis = list(autorange = TRUE)) %>% 
   layout(yaxis2 = list(type = "log",
                       tickvals = as.list(c(seq(0.2,1,0.2), seq(2,8,2))))) %>%
@@ -4028,7 +4601,17 @@ terengganu_trans_curve <- plot_ly() %>%
                                     "Terengganu",
                                     '</i>')))
 
-terengganu_trans_curve %>%
+terengganu_trans_curve  %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      ))) %>%
   layout(xaxis = list(autorange = TRUE)) %>% 
   layout(yaxis2 = list(type = "log",
                       tickvals = as.list(c(seq(0.2,1,0.2), seq(2,8,2))))) %>%
@@ -4076,7 +4659,17 @@ kelantan_trans_curve <- plot_ly() %>%
                                     "Kelantan",
                                     '</i>')))
 
-kelantan_trans_curve %>%
+kelantan_trans_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      )))  %>%
   layout(xaxis = list(autorange = TRUE)) %>% 
   layout(yaxis2 = list(type = "log",
                       tickvals = as.list(c(seq(0.2,1,0.2), seq(2,8,2))))) %>%
@@ -4124,7 +4717,17 @@ sarawak_trans_curve <- plot_ly() %>%
                                     "Sarawak",
                                     '</i>')))
 
-sarawak_trans_curve %>%
+sarawak_trans_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      ))) %>%
   layout(xaxis = list(autorange = TRUE)) %>% 
   layout(yaxis2 = list(type = "log",
                       tickvals = as.list(c(seq(0.2,1,0.2), seq(2,8,2))))) %>%
@@ -4172,7 +4775,17 @@ sabah_trans_curve <- plot_ly() %>%
                                     "Sabah",
                                     '</i>')))
 
-sabah_trans_curve %>%
+sabah_trans_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      ))) %>%
   layout(xaxis = list(autorange = TRUE)) %>% 
   layout(yaxis2 = list(type = "log",
                       tickvals = as.list(c(seq(0.2,1,0.2), seq(2,8,2))))) %>%
@@ -4220,7 +4833,17 @@ labuan_trans_curve <- plot_ly() %>%
                                     "W.P. Labuan",
                                     '</i>')))
 
-labuan_trans_curve %>%
+labuan_trans_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      )))  %>%
   layout(xaxis = list(autorange = TRUE)) %>% 
   layout(yaxis2 = list(type = "log",
                       tickvals = as.list(c(seq(0.2,1,0.2), seq(2,8,2)))))%>%
@@ -4274,7 +4897,17 @@ mas_mob_curve <- plot_ly() %>%
                        title = paste0("Average change from",
                                     '<br>', "baseline (%)"),
          legend = list(x = 1.05, y = 0.9)))
-mas_mob_curve%>%
+mas_mob_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      ))) %>%
   layout(xaxis = list(autorange = TRUE)) %>%
   layout(title = list(text = paste0("Average Google mobility score and COVID-19",
                                     '<br>',
@@ -4321,7 +4954,17 @@ perlis_mob_curve <- plot_ly() %>%
                        title = paste0("Average change from",
                                     '<br>', "baseline (%)")),
          legend = list(x = 1.05, y = 0.9))
-perlis_mob_curve%>%
+perlis_mob_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      ))) %>%
   layout(xaxis = list(autorange = TRUE)) %>%
   layout(title = list(text = paste0("Average Google mobility score and COVID-19",
                                     '<br>',
@@ -4364,7 +5007,17 @@ kedah_mob_curve <- plot_ly() %>%
                        title = paste0("Average change from",
                                     '<br>', "baseline (%)")),
          legend = list(x = 1.05, y = 0.9))
-kedah_mob_curve%>%
+kedah_mob_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      ))) %>%
   layout(xaxis = list(autorange = TRUE)) %>%
   layout(title = list(text = paste0("Average Google mobility score and COVID-19",
                                     '<br>',
@@ -4406,7 +5059,17 @@ penang_mob_curve <- plot_ly() %>%
                        title = paste0("Average change from",
                                     '<br>', "baseline (%)")),
          legend = list(x = 1.05, y = 0.9))
-penang_mob_curve%>%
+penang_mob_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      ))) %>%
   layout(xaxis = list(autorange = TRUE)) %>%
   layout(title = list(text = paste0("Average Google mobility score and COVID-19",
                                     '<br>',
@@ -4447,7 +5110,17 @@ perak_mob_curve <- plot_ly() %>%
                        title = paste0("Average change from",
                                     '<br>', "baseline (%)")),
          legend = list(x = 1.05, y = 0.9))
-perak_mob_curve%>%
+perak_mob_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      ))) %>%
   layout(xaxis = list(autorange = TRUE)) %>%
   layout(title = list(text = paste0("Average Google mobility score and COVID-19",
                                     '<br>',
@@ -4488,7 +5161,17 @@ selangor_mob_curve <- plot_ly() %>%
                        title = paste0("Average change from",
                                     '<br>', "baseline (%)")),
          legend = list(x = 1.05, y = 0.9))
-selangor_mob_curve%>%
+selangor_mob_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      ))) %>%
   layout(xaxis = list(autorange = TRUE)) %>%
   layout(title = list(text = paste0("Average Google mobility score and COVID-19",
                                     '<br>',
@@ -4529,7 +5212,17 @@ kl_mob_curve <- plot_ly() %>%
                        title = paste0("Average change from",
                                     '<br>', "baseline (%)")),
          legend = list(x = 1.05, y = 0.9))
-mas_mob_curve%>%
+kl_mob_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      ))) %>%
   layout(xaxis = list(autorange = TRUE)) %>%
   layout(title = list(text = paste0("Average Google mobility score and COVID-19",
                                     '<br>',
@@ -4570,7 +5263,17 @@ putrajaya_mob_curve <- plot_ly() %>%
                        title = paste0("Average change from",
                                     '<br>', "baseline (%)")),
          legend = list(x = 1.05, y = 0.9))
-putrajaya_mob_curve%>%
+putrajaya_mob_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      ))) %>%
   layout(xaxis = list(autorange = TRUE)) %>%
   layout(title = list(text = paste0("Average Google mobility score and COVID-19",
                                     '<br>',
@@ -4611,7 +5314,17 @@ melaka_mob_curve <- plot_ly() %>%
                       title = paste0("Average change from",
                                     '<br>', "baseline (%)")),
          legend = list(x = 1.05, y = 0.9))
-melaka_mob_curve%>%
+melaka_mob_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      ))) %>%
   layout(xaxis = list(autorange = TRUE)) %>%
   layout(title = list(text = paste0("Average Google mobility score and COVID-19",
                                     '<br>',
@@ -4652,7 +5365,17 @@ negeri_mob_curve <- plot_ly() %>%
                        title = paste0("Average change from",
                                     '<br>', "baseline (%)")),
          legend = list(x = 1.05, y = 0.9))
-negeri_mob_curve%>%
+negeri_mob_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      ))) %>%
   layout(xaxis = list(autorange = TRUE)) %>%
   layout(title = list(text = paste0("Average Google mobility score and COVID-19",
                                     '<br>',
@@ -4693,7 +5416,17 @@ johor_mob_curve <- plot_ly() %>%
                        title = paste0("Average change from",
                                     '<br>', "baseline (%)")),
          legend = list(x = 1.05, y = 0.9))
-johor_mob_curve%>%
+johor_mob_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      ))) %>%
   layout(xaxis = list(autorange = TRUE)) %>%
   layout(title = list(text = paste0("Average Google mobility score and COVID-19",
                                     '<br>',
@@ -4734,7 +5467,17 @@ pahang_mob_curve <- plot_ly() %>%
                        title = paste0("Average change from",
                                     '<br>', "baseline (%)")),
          legend = list(x = 1.05, y = 0.9))
-pahang_mob_curve%>%
+pahang_mob_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      ))) %>%
   layout(xaxis = list(autorange = TRUE)) %>%
   layout(title = list(text = paste0("Average Google mobility score and COVID-19",
                                     '<br>',
@@ -4775,7 +5518,17 @@ terengganu_mob_curve <- plot_ly() %>%
                        title = paste0("Average change from",
                                     '<br>', "baseline (%)")),
          legend = list(x = 1.05, y = 0.9))
-terengganu_mob_curve%>%
+terengganu_mob_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      ))) %>%
   layout(xaxis = list(autorange = TRUE)) %>%
   layout(title = list(text = paste0("Average Google mobility score and COVID-19",
                                     '<br>',
@@ -4816,7 +5569,17 @@ kelantan_mob_curve <- plot_ly() %>%
                        title = paste0("Average change from",
                                     '<br>', "baseline (%)")),
          legend = list(x = 1.05, y = 0.9))
-kelantan_mob_curve%>%
+kelantan_mob_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      ))) %>%
   layout(xaxis = list(autorange = TRUE)) %>%
   layout(title = list(text = paste0("Average Google mobility score and COVID-19",
                                     '<br>',
@@ -4857,7 +5620,17 @@ sarawak_mob_curve <- plot_ly() %>%
                        title = paste0("Average change from",
                                     '<br>', "baseline (%)")),
          legend = list(x = 1.05, y = 0.9))
-sarawak_mob_curve%>%
+sarawak_mob_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      ))) %>%
   layout(xaxis = list(autorange = TRUE)) %>%
   layout(title = list(text = paste0("Average Google mobility score and COVID-19",
                                     '<br>',
@@ -4898,7 +5671,17 @@ sabah_mob_curve <- plot_ly() %>%
                        title = paste0("Average change from",
                                     '<br>', "baseline (%)")),
          legend = list(x = 1.05, y = 0.9))
-sabah_mob_curve%>%
+sabah_mob_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      ))) %>%
   layout(xaxis = list(autorange = TRUE)) %>%
   layout(title = list(text = paste0("Average Google mobility score and COVID-19",
                                     '<br>',
@@ -4939,7 +5722,17 @@ labuan_mob_curve <- plot_ly() %>%
                        title = paste0("Average change from",
                                     '<br>', "baseline (%)")),
          legend = list(x = 1.05, y = 0.9))
-labuan_mob_curve%>%
+labuan_mob_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      ))) %>%
   layout(xaxis = list(autorange = TRUE)) %>%
   layout(title = list(text = paste0("Average Google mobility score and COVID-19",
                                     '<br>',
