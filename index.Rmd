@@ -204,7 +204,7 @@ ts_mas_short$lower[ts_mas_short$lower<0] <- 0.01
 ################################################################################################################################
 #import the mobility data and get them into states
 #load data
-Global_Mobility_Report_3_ <- read_csv("P:/COVID-19/R0 Malaysia/data/mobility/Global_Mobility_Report_210112.csv", 
+Global_Mobility_Report_3_ <- read_csv("P:/COVID-19/R0 Malaysia/data/mobility/Global_Mobility_Report_210113.csv", 
                                       col_types = cols(census_fips_code = col_character(), 
                                                        date = col_character(), grocery_and_pharmacy_percent_change_from_baseline = col_number(), 
                                                        iso_3166_2_code = col_character(), 
@@ -239,7 +239,7 @@ names(ts_mas)[names(ts_mas)=="residential_percent_change_from_baseline"]="reside
 ```{r, include=FALSE}
 #get the data for states in
 #load Malaysian data by state from data.world
-df <- read_csv("P:/COVID-19/R0 Malaysia/data/incidence/covid-19_my_state.csv", 
+df <- read_csv("P:/COVID-19/R0 Malaysia/data/incidence/covid-19_my_state_v2.csv", 
         col_types = cols(date = col_date(format = "%d/%m/%Y"), 
         new_cases = col_number(), total_cases = col_number(), 
         new_deaths = col_number(), total_deaths = col_number()))
@@ -2607,7 +2607,7 @@ mas_inc_curve <- plot_ly() %>%
                               "(per 100,000 population)")),
   updatemenus = list(
     list(
-      y = 0.25, x=1.05,
+      y = 0.55, x=1.08,
       buttons = list(
         list(method = "restyle",
              args = list("visible", list(TRUE, TRUE, TRUE, TRUE,TRUE, TRUE, TRUE, TRUE,TRUE, TRUE, TRUE, TRUE,TRUE, TRUE, TRUE, TRUE,
@@ -2629,8 +2629,8 @@ mas_inc_curve <- plot_ly() %>%
            sizey = 0.2,
            opacity = 1.1
       )))  %>%
-  layout(yaxis = list(type = "log",
-                      tickvals = as.list(c(1,10,100,1000)))) %>% 
+  layout(yaxis = list(type = "log", range=c(0.5,3.5),
+                      tickvals = as.list(c(10,100,1000)))) %>% 
   layout(titlefont=list(size=12)) %>%
   config(modeBarButtonsToRemove = c("zoomIn2d", "zoomOut2d", "autoScale2d", "resetScale2d", "hoverClosestCartesian", "hoverCompareCartesian","lasso2d", "select2d", "pan2d","zoom2d")) %>%
   layout(xaxis=list(fixedrange=TRUE)) %>% layout(yaxis=list(fixedrange=TRUE)) %>%
@@ -2666,7 +2666,7 @@ mas_inc_curve <- plot_ly() %>%
                               "(per 100,000 population)")),
   updatemenus = list(
     list(
-      y = 0.25, x=1.105,
+       y = 0.55, x=1.08,
       buttons = list(
         list(method = "restyle",
              args = list("visible", list(TRUE, TRUE, TRUE, TRUE,TRUE, TRUE, TRUE, TRUE,TRUE, TRUE, TRUE, TRUE,TRUE, TRUE, TRUE, TRUE,
