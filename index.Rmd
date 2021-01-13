@@ -2607,7 +2607,7 @@ mas_inc_curve <- plot_ly() %>%
                               "(per 100,000 population)")),
   updatemenus = list(
     list(
-      y = 0.55, x=1.08,
+      y = 0.4, x=1.08,
       buttons = list(
         list(method = "restyle",
              args = list("visible", list(TRUE, TRUE, TRUE, TRUE,TRUE, TRUE, TRUE, TRUE,TRUE, TRUE, TRUE, TRUE,TRUE, TRUE, TRUE, TRUE,
@@ -2666,7 +2666,7 @@ mas_inc_curve <- plot_ly() %>%
                               "(per 100,000 population)")),
   updatemenus = list(
     list(
-       y = 0.55, x=1.08,
+       y = 0.4, x=1.08,
       buttons = list(
         list(method = "restyle",
              args = list("visible", list(TRUE, TRUE, TRUE, TRUE,TRUE, TRUE, TRUE, TRUE,TRUE, TRUE, TRUE, TRUE,TRUE, TRUE, TRUE, TRUE,
