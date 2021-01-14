@@ -58,7 +58,7 @@ clusters <- read_csv("P:/COVID-19/R0 Malaysia/data/cluster data/clusters3.csv",
         jalan_harapan=col_number(), bakti=col_number(), tembok_gajah=col_number(), 
         kolam_air=col_number(), hala_mutiara=col_number(), pompod=col_number(),
         pagar_siput=col_number(), pagar_bentong=col_number(), tembok_mempaga=col_number(),
-        telok_mas=col_number()))
+        telok_mas=col_number(), tropika=col_number()))
 
 
 #pull new data set
@@ -84,7 +84,7 @@ df <- full_join(new, clusters, by=c("no","date"))
 df$ins <- df$dti+df$tembok+df$benteng_pk+df$penjara_reman+df$penjara_jawi+df$kepayan+df$penjara_tapah+
   df$rumah_merah+df$pts_tawau+df$penjara_sandakan+df$gk_tawau+df$matambai+df$jalan_harapan+df$bakti+df$sibuga+
   df$tembok_gajah + df$kolam_air + df$hala_mutiara + df$pompod + df$pagar_siput + df$pagar_bentong + 
-  df$tembok_mempaga + df$telok_mas
+  df$tembok_mempaga + df$telok_mas +df$tropika
 
 ##########################################################################################
 #arbitrary cut of point for visualisation of clusters with at least 150 cases or more
@@ -204,7 +204,7 @@ ts_mas_short$lower[ts_mas_short$lower<0] <- 0.01
 ################################################################################################################################
 #import the mobility data and get them into states
 #load data
-Global_Mobility_Report_3_ <- read_csv("P:/COVID-19/R0 Malaysia/data/mobility/Global_Mobility_Report_210113.csv", 
+Global_Mobility_Report_3_ <- read_csv("P:/COVID-19/R0 Malaysia/data/mobility/Global_Mobility_Report_210114.csv", 
                                       col_types = cols(census_fips_code = col_character(), 
                                                        date = col_character(), grocery_and_pharmacy_percent_change_from_baseline = col_number(), 
                                                        iso_3166_2_code = col_character(), 
@@ -2607,7 +2607,7 @@ mas_inc_curve <- plot_ly() %>%
                               "(per 100,000 population)")),
   updatemenus = list(
     list(
-      y = 0.4, x=1.08,
+      y = 0.4, x=1.1,
       buttons = list(
         list(method = "restyle",
              args = list("visible", list(TRUE, TRUE, TRUE, TRUE,TRUE, TRUE, TRUE, TRUE,TRUE, TRUE, TRUE, TRUE,TRUE, TRUE, TRUE, TRUE,
@@ -2666,7 +2666,7 @@ mas_inc_curve <- plot_ly() %>%
                               "(per 100,000 population)")),
   updatemenus = list(
     list(
-       y = 0.4, x=1.08,
+       y = 0.4, x=1.1,
       buttons = list(
         list(method = "restyle",
              args = list("visible", list(TRUE, TRUE, TRUE, TRUE,TRUE, TRUE, TRUE, TRUE,TRUE, TRUE, TRUE, TRUE,TRUE, TRUE, TRUE, TRUE,
@@ -2726,22 +2726,21 @@ names(ts_mas)[names(ts_mas)=="ven_perc"] <- paste("Ventilator utilisation (%)","
 #plot the incidence curve
 mas_cap_curve <- ggplot(data=ts_mas,aes(x=date)) +
   geom_line(aes(y=`General bed utilisation (%) (n= 25456 )`,col="General bed utilisation (%) (n= 25456 )"),
-            stat="identity",size=0.8, show.legend = T) + 
+            stat="identity",size=0.6, show.legend = T) + 
   geom_line(aes(y=`ICU bed utilisation (%) (n= 871 )`,col="ICU bed utilisation (%) (n= 871 )"),
-            stat="identity",size=0.8,show.legend = T) +
+            stat="identity",size=0.6,show.legend = T) +
   geom_line(aes(y=`Ventilator utilisation (%) (n= 1581 )`, col="Ventilator utilisation (%) (n= 1581 )"),
-            stat="identity",size=0.8,alpha=0.6, show.legend = T) +
+            stat="identity",size=0.6,alpha=0.6, show.legend = T) +
   scale_colour_manual(name = "",labels = c("General bed utilisation (%) (n= 25456 )"="General bed utilisation (%)\n 
                                            (n= 25456 )", 
                                            "ICU bed utilisation (%) (n= 871 )"="ICU bed utilisation (%)\n
                                            (n= 871 )", 
                                            "Ventilator utilisation (%) (n= 1581 )"="Ventilator utilisation (%)\n
                                            (n= 1581 )"),
-                      values = c("General bed utilisation (%) (n= 25456 )"="midnightblue", 
-                                 "ICU bed utilisation (%) (n= 871 )"="firebrick2", 
-                                 "Ventilator utilisation (%) (n= 1581 )"="seagreen2")) +
-  geom_hline(aes(yintercept=100),colour="red", linetype="dashed",size=0.5) +
-  geom_hline(aes(yintercept=70),colour="gold1", linetype="dashed",size=0.5) +
+                      values = c("General bed utilisation (%) (n= 25456 )"="#003f5c", 
+                                 "ICU bed utilisation (%) (n= 871 )"="#C14953", 
+                                 "Ventilator utilisation (%) (n= 1581 )"="#ffa600")) +
+  geom_hline(aes(yintercept=100),colour="firebrick2", linetype="dashed",size=0.3, alpha=0.5) +
   theme_minimal() +
   theme(legend.position = c(.95, .5),
         legend.justification = c("right", "top"),
@@ -2758,7 +2757,7 @@ mas_cap_curve <- ggplot(data=ts_mas,aes(x=date)) +
         axis.title.x = element_text(size=10),
         axis.title.y=element_text(size=10),
         axis.title = element_text(size=10)) +
-  ylim(0,150) +
+  ylim(0,200) +
   scale_x_date(date_breaks = "4 week", date_minor_breaks = "1 day",
                date_labels = "%e %b", limits =c(as.Date(Sys.Date()-91),as.Date(Sys.Date()+1))) +
   labs(x = "Date", y="Utilisation (%)")
@@ -2862,8 +2861,6 @@ perlis_bed_curve %>% layout(
 
 ### Kedah {.no-mobile}
 ```{r}
-knitr::opts_current$get()$label
-
 #change the name first
 names(kedah)[names(kedah)=="bed_perc5"] <- "General bed utilisation Upper Quartile (%)"
 names(kedah)[names(kedah)=="bed_perc3"] <- "General bed utilisation Lower Quartile (%)"
