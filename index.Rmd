@@ -59,7 +59,7 @@ clusters <- read_csv("P:/COVID-19/R0 Malaysia/data/cluster data/clusters3.csv",
         kolam_air=col_number(), hala_mutiara=col_number(), pompod=col_number(),
         pagar_siput=col_number(), pagar_bentong=col_number(), tembok_mempaga=col_number(),
         telok_mas=col_number(), tropika=col_number(), tembok_kemus=col_number(), 
-        tembok_nenas=col_number()))
+        tembok_nenas=col_number(), teratai=col_number()))
 
 
 #pull new data set
@@ -205,7 +205,7 @@ ts_mas_short$lower[ts_mas_short$lower<0] <- 0.01
 ################################################################################################################################
 #import the mobility data and get them into states
 #load data
-Global_Mobility_Report_3_ <- read_csv("P:/COVID-19/R0 Malaysia/data/mobility/Global_Mobility_Report_210116.csv", 
+Global_Mobility_Report_3_ <- read_csv("P:/COVID-19/R0 Malaysia/data/mobility/Global_Mobility_Report_210117.csv", 
                                       col_types = cols(census_fips_code = col_character(), 
                                                        date = col_character(), grocery_and_pharmacy_percent_change_from_baseline = col_number(), 
                                                        iso_3166_2_code = col_character(), 
