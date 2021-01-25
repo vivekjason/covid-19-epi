@@ -146,7 +146,7 @@ new <- as.data.frame(new)
 
 #create moving averages
 new <- new %>%
-  mutate(daily_ma01 = rollmean(new_cases, k = 5, fill = NA))
+  mutate(daily_ma01 = rollmean(new_cases, k = 5, fill = "extend"))
 
 #back convert dates
 new$date <- as.Date(new$date)
@@ -207,7 +207,7 @@ ts_mas_short$lower[ts_mas_short$lower<0] <- 0.01
 ################################################################################################################################
 #import the mobility data and get them into states
 #load data
-Global_Mobility_Report_3_ <- read_csv("P:/COVID-19/R0 Malaysia/data/mobility/Global_Mobility_Report_210124.csv", 
+Global_Mobility_Report_3_ <- read_csv("P:/COVID-19/R0 Malaysia/data/mobility/Global_Mobility_Report_210125.csv", 
                                       col_types = cols(census_fips_code = col_character(), 
                                                        date = col_character(), grocery_and_pharmacy_percent_change_from_baseline = col_number(), 
                                                        iso_3166_2_code = col_character(), 
@@ -335,7 +335,7 @@ perlis_r0_df
 
 #create moving averages
 perlis_r0_df <- perlis_r0_df %>%
-  mutate(daily_ma01 = rollmean(case, k = 5, fill = NA))
+  mutate(daily_ma01 = rollmean(case, k = 5, fill = "extend"))
 
 #create a 14-day moving incidence rate
 perlis_r0_df$incident14 <- rollsum(perlis_r0_df$case,k=14,fill=NA, align="right")
@@ -392,7 +392,7 @@ kedah_r0_df
 
 #create moving averages
 kedah_r0_df <- kedah_r0_df %>%
-  mutate(daily_ma01 = rollmean(case, k = 5, fill = NA))
+  mutate(daily_ma01 = rollmean(case, k = 5, fill = "extend"))
 
 #create a 14-day moving incidence rate
 kedah_r0_df$incident14 <- rollsum(kedah_r0_df$case,k=14,fill=NA, align="right")
@@ -450,7 +450,7 @@ penang_r0_df
 
 #create moving averages
 penang_r0_df <- penang_r0_df %>%
-  mutate(daily_ma01 = rollmean(case, k = 5, fill = NA))
+  mutate(daily_ma01 = rollmean(case, k = 5, fill = "extend"))
 
 #create a 14-day moving incidence rate
 penang_r0_df$incident14 <- rollsum(penang_r0_df$case,k=14,fill=NA, align="right")
@@ -508,7 +508,7 @@ perak_r0_df
 
 #create moving averages
 perak_r0_df <- perak_r0_df %>%
-  mutate(daily_ma01 = rollmean(case, k = 5, fill = NA))
+  mutate(daily_ma01 = rollmean(case, k = 5, fill = "extend"))
 
 #create a 14-day moving incidence rate
 perak_r0_df$incident14 <- rollsum(perak_r0_df$case,k=14,fill=NA, align="right")
@@ -566,7 +566,7 @@ selangor_r0_df
 
 #create moving averages
 selangor_r0_df <- selangor_r0_df %>%
-  mutate(daily_ma01 = rollmean(case, k = 5, fill = NA))
+  mutate(daily_ma01 = rollmean(case, k = 5, fill = "extend"))
 
 #create a 14-day moving incidence rate
 selangor_r0_df$incident14 <- rollsum(selangor_r0_df$case,k=14,fill=NA, align="right")
@@ -623,7 +623,7 @@ kl_r0_df
 
 #create moving averages
 kl_r0_df <- kl_r0_df %>%
-  mutate(daily_ma01 = rollmean(case, k = 5, fill = NA))
+  mutate(daily_ma01 = rollmean(case, k = 5, fill = "extend"))
 
 #create a 14-day moving incidence rate
 kl_r0_df$incident14 <- rollsum(kl_r0_df$case,k=14,fill=NA, align="right")
@@ -680,7 +680,7 @@ putrajaya_r0_df
 
 #create moving averages
 putrajaya_r0_df <- putrajaya_r0_df %>%
-  mutate(daily_ma01 = rollmean(case, k = 5, fill = NA))
+  mutate(daily_ma01 = rollmean(case, k = 5, fill = "extend"))
 
 #create a 14-day moving incidence rate
 putrajaya_r0_df$incident14 <- rollsum(putrajaya_r0_df$case,k=14,fill=NA, align="right")
@@ -737,7 +737,7 @@ negeri_r0_df
 
 #create moving averages
 negeri_r0_df <- negeri_r0_df %>%
-  mutate(daily_ma01 = rollmean(case, k = 5, fill = NA))
+  mutate(daily_ma01 = rollmean(case, k = 5, fill = "extend"))
 
 #create a 14-day moving incidence rate
 negeri_r0_df$incident14 <- rollsum(negeri_r0_df$case,k=14,fill=NA, align="right")
@@ -794,7 +794,7 @@ melaka_r0_df
 
 #create moving averages
 melaka_r0_df <- melaka_r0_df %>%
-  mutate(daily_ma01 = rollmean(case, k = 5, fill = NA))
+  mutate(daily_ma01 = rollmean(case, k = 5, fill = "extend"))
 
 #create a 14-day moving incidence rate
 melaka_r0_df$incident14 <- rollsum(melaka_r0_df$case,k=14,fill=NA, align="right")
@@ -852,7 +852,7 @@ johor_r0_df
 
 #create moving averages
 johor_r0_df <- johor_r0_df %>%
-  mutate(daily_ma01 = rollmean(case, k = 5, fill = NA))
+  mutate(daily_ma01 = rollmean(case, k = 5, fill = "extend"))
 
 
 #create a 14-day moving incidence rate
@@ -910,7 +910,7 @@ pahang_r0_df
 
 #create moving averages
 pahang_r0_df <- pahang_r0_df %>%
-  mutate(daily_ma01 = rollmean(case, k = 5, fill = NA))
+  mutate(daily_ma01 = rollmean(case, k = 5, fill = "extend"))
 
 #create a 14-day moving incidence rate
 pahang_r0_df$incident14 <- rollsum(pahang_r0_df$case,k=14,fill=NA, align="right")
@@ -967,7 +967,7 @@ terengganu_r0_df
 
 #create moving averages
 terengganu_r0_df <- terengganu_r0_df %>%
-  mutate(daily_ma01 = rollmean(case, k = 5, fill = NA))
+  mutate(daily_ma01 = rollmean(case, k = 5, fill = "extend"))
 
 #create a 14-day moving incidence rate
 terengganu_r0_df$incident14 <- rollsum(terengganu_r0_df$case,k=14,fill=NA, align="right")
@@ -1024,7 +1024,7 @@ kelantan_r0_df
 
 #create moving averages
 kelantan_r0_df <- kelantan_r0_df %>%
-  mutate(daily_ma01 = rollmean(case, k = 5, fill = NA))
+  mutate(daily_ma01 = rollmean(case, k = 5, fill = "extend"))
 
 #create a 14-day moving incidence rate
 kelantan_r0_df$incident14 <- rollsum(kelantan_r0_df$case,k=14,fill=NA, align="right")
@@ -1082,7 +1082,7 @@ sabah_r0_df
 
 #create moving averages
 sabah_r0_df <- sabah_r0_df %>%
-  mutate(daily_ma01 = rollmean(case, k = 5, fill = NA))
+  mutate(daily_ma01 = rollmean(case, k = 5, fill = "extend"))
 
 #create a 14-day moving incidence rate
 sabah_r0_df$incident14 <- rollsum(sabah_r0_df$case,k=14,fill=NA, align="right")
@@ -1140,7 +1140,7 @@ sarawak_r0_df
 
 #create moving averages
 sarawak_r0_df <- sarawak_r0_df %>%
-  mutate(daily_ma01 = rollmean(case, k = 5, fill = NA))
+  mutate(daily_ma01 = rollmean(case, k = 5, fill = "extend"))
 
 #create a 14-day moving incidence rate
 sarawak_r0_df$incident14 <- rollsum(sarawak_r0_df$case,k=14,fill=NA, align="right")
@@ -1198,7 +1198,7 @@ labuan_r0_df
 
 #create moving averages
 labuan_r0_df <- labuan_r0_df %>%
-  mutate(daily_ma01 = rollmean(case, k = 5, fill = NA))
+  mutate(daily_ma01 = rollmean(case, k = 5, fill = "extend"))
 
 #create a 14-day moving incidence rate
 labuan_r0_df$incident14 <- rollsum(labuan_r0_df$case,k=14,fill=NA, align="right")
@@ -2760,7 +2760,7 @@ mas_cap_curve <- ggplot(data=ts_mas,aes(x=date)) +
         axis.title.x = element_text(size=10),
         axis.title.y=element_text(size=10),
         axis.title = element_text(size=10)) +
-  ylim(0,200) +
+  ylim(0,300) +
   scale_x_date(date_breaks = "4 week", date_minor_breaks = "1 day",
                date_labels = "%e %b", limits =c(as.Date(Sys.Date()-91),as.Date(Sys.Date()+1))) +
   labs(x = "Date", y="Utilisation (%)")
@@ -2830,7 +2830,7 @@ perlis_bed_curve <- plot_ly(perlis, x = ~date, y = ~bed_perc9, type = 'scatter',
                       tickcolor = 'rgb(127,127,127)',
                       ticks = 'outside',
                       zeroline = FALSE,
-                      range = c(0,150))) %>%
+                      range = c(0,250))) %>%
   layout(title = list(text = paste0("Estimated bed-occupancy rate",
                                     '<br>',
                                     '<i>',
@@ -2895,7 +2895,7 @@ kedah_bed_curve <- plot_ly(kedah, x = ~date, y = ~bed_perc9, type = 'scatter', m
                       tickcolor = 'rgb(127,127,127)',
                       ticks = 'outside',
                       zeroline = FALSE,
-                      range = c(0,150))) %>%
+                      range = c(0,250))) %>%
   layout(title = list(text = paste0("Estimated bed-occupancy rate",
                                     '<br>',
                                     '<i>',
@@ -2960,7 +2960,7 @@ penang_bed_curve <- plot_ly(penang, x = ~date, y = ~bed_perc9, type = 'scatter',
                       tickcolor = 'rgb(127,127,127)',
                       ticks = 'outside',
                       zeroline = FALSE,
-                      range = c(0,150))) %>%
+                      range = c(0,250))) %>%
   layout(title = list(text = paste0("Estimated bed-occupancy rate",
                                     '<br>',
                                     '<i>',
@@ -3025,7 +3025,7 @@ perak_bed_curve <- plot_ly(perak, x = ~date, y = ~bed_perc9, type = 'scatter', m
                       tickcolor = 'rgb(127,127,127)',
                       ticks = 'outside',
                       zeroline = FALSE,
-                      range = c(0,150))) %>%
+                      range = c(0,250))) %>%
   layout(title = list(text = paste0("Estimated bed-occupancy rate",
                                     '<br>',
                                     '<i>',
@@ -3090,7 +3090,7 @@ selangor_bed_curve <- plot_ly(selangor, x = ~date, y = ~bed_perc9, type = 'scatt
                       tickcolor = 'rgb(127,127,127)',
                       ticks = 'outside',
                       zeroline = FALSE,
-                      range = c(0,200))) %>%
+                      range = c(0,250))) %>%
   layout(title = list(text = paste0("Estimated bed-occupancy rate",
                                     '<br>',
                                     '<i>',
@@ -3154,7 +3154,7 @@ kl_bed_curve <- plot_ly(kl, x = ~date, y = ~bed_perc9, type = 'scatter', mode = 
                       tickcolor = 'rgb(127,127,127)',
                       ticks = 'outside',
                       zeroline = FALSE,
-                      range = c(0,200))) %>%
+                      range = c(0,250))) %>%
   layout(title = list(text = paste0("Estimated bed-occupancy rate",
                                     '<br>',
                                     '<i>',
@@ -3219,7 +3219,7 @@ putrajaya_bed_curve <- plot_ly(putrajaya,x = ~date, y = ~bed_perc9, type = 'scat
                       tickcolor = 'rgb(127,127,127)',
                       ticks = 'outside',
                       zeroline = FALSE,
-                      range = c(0,150))) %>%
+                      range = c(0,250))) %>%
   layout(title = list(text = paste0("Estimated bed-occupancy rate",
                                     '<br>',
                                     '<i>',
@@ -3283,7 +3283,7 @@ negeri_bed_curve <- plot_ly(negeri, x = ~date, y = ~bed_perc9, type = 'scatter',
                       tickcolor = 'rgb(127,127,127)',
                       ticks = 'outside',
                       zeroline = FALSE,
-                      range = c(0,200))) %>%
+                      range = c(0,250))) %>%
   layout(title = list(text = paste0("Estimated bed-occupancy rate",
                                     '<br>',
                                     '<i>',
@@ -3347,7 +3347,7 @@ melaka_bed_curve <- plot_ly(melaka, x = ~date, y = ~bed_perc9, type = 'scatter',
                       tickcolor = 'rgb(127,127,127)',
                       ticks = 'outside',
                       zeroline = FALSE,
-                      range = c(0,150))) %>%
+                      range = c(0,250))) %>%
   layout(title = list(text = paste0("Estimated bed-occupancy rate",
                                     '<br>',
                                     '<i>',
@@ -3411,7 +3411,7 @@ johor_bed_curve <- plot_ly(johor, x = ~date, y = ~bed_perc9, type = 'scatter', m
                       tickcolor = 'rgb(127,127,127)',
                       ticks = 'outside',
                       zeroline = FALSE,
-                      range = c(0,150))) %>%
+                      range = c(0,250))) %>%
   layout(title = list(text = paste0("Estimated bed-occupancy rate",
                                     '<br>',
                                     '<i>',
@@ -3475,7 +3475,7 @@ pahang_bed_curve <- plot_ly(pahang, x = ~date, y = ~bed_perc9, type = 'scatter',
                       tickcolor = 'rgb(127,127,127)',
                       ticks = 'outside',
                       zeroline = FALSE,
-                      range = c(0,150))) %>%
+                      range = c(0,250))) %>%
   layout(title = list(text = paste0("Estimated bed-occupancy rate",
                                     '<br>',
                                     '<i>',
@@ -3539,7 +3539,7 @@ terengganu_bed_curve <- plot_ly(pahang,x = ~date, y = ~bed_perc9, type = 'scatte
                       tickcolor = 'rgb(127,127,127)',
                       ticks = 'outside',
                       zeroline = FALSE,
-                      range = c(0,150))) %>%
+                      range = c(0,250))) %>%
   layout(title = list(text = paste0("Estimated bed-occupancy rate",
                                     '<br>',
                                     '<i>',
@@ -3603,7 +3603,7 @@ kelantan_bed_curve <- plot_ly(kelantan, x = ~date, y = ~bed_perc9, type = 'scatt
                       tickcolor = 'rgb(127,127,127)',
                       ticks = 'outside',
                       zeroline = FALSE,
-                      range = c(0,150))) %>%
+                      range = c(0,250))) %>%
   layout(title = list(text = paste0("Estimated bed-occupancy rate",
                                     '<br>',
                                     '<i>',
@@ -3667,7 +3667,7 @@ sarawak_bed_curve <- plot_ly(sarawak, x = ~date, y = ~bed_perc9, type = 'scatter
                       tickcolor = 'rgb(127,127,127)',
                       ticks = 'outside',
                       zeroline = FALSE,
-                      range = c(0,150))) %>%
+                      range = c(0,250))) %>%
   layout(title = list(text = paste0("Estimated bed-occupancy rate",
                                     '<br>',
                                     '<i>',
@@ -3731,7 +3731,7 @@ sabah_bed_curve <- plot_ly(sabah, x = ~date, y = ~bed_perc9, type = 'scatter', m
                       tickcolor = 'rgb(127,127,127)',
                       ticks = 'outside',
                       zeroline = FALSE,
-                      range = c(0,150))) %>%
+                      range = c(0,250))) %>%
   layout(title = list(text = paste0("Estimated bed-occupancy rate",
                                     '<br>',
                                     '<i>',
@@ -3794,7 +3794,7 @@ labuan_bed_curve <- plot_ly(labuan, x = ~date, y = ~bed_perc9, type = 'scatter',
                       tickcolor = 'rgb(127,127,127)',
                       ticks = 'outside',
                       zeroline = FALSE,
-                      range = c(0,150))) %>%
+                      range = c(0,250))) %>%
   layout(title = list(text = paste0("Estimated bed-occupancy rate",
                                     '<br>',
                                     '<i>',
@@ -3828,6 +3828,7 @@ labuan_bed_curve %>% layout(
 ### Comparison of estimated bed-occupancy rate {.no-mobile}
 ```{r, fig.width=18,fig.height=8}
 #change ams$state to max 100%
+mas_state$bed_perc9[mas_state$state=="Malaysia"] <- mas_state$bed_perc5
 mas_state$bed_perc9[mas_state$bed_perc9>=100] <- 100
 
 #change the name first
