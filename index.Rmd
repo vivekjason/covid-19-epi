@@ -208,7 +208,7 @@ ts_mas_short$lower[ts_mas_short$lower<0] <- 0.01
 ################################################################################################################################
 #import the mobility data and get them into states
 #load data
-Global_Mobility_Report_3_ <- read_csv("P:/COVID-19/R0 Malaysia/data/mobility/Global_Mobility_Report_210215.csv", 
+Global_Mobility_Report_3_ <- read_csv("P:/COVID-19/R0 Malaysia/data/mobility/Global_Mobility_Report_210216.csv", 
                                       col_types = cols(census_fips_code = col_character(), 
                                                        date = col_character(), grocery_and_pharmacy_percent_change_from_baseline = col_number(), 
                                                        iso_3166_2_code = col_character(), 
@@ -279,7 +279,7 @@ mobility <- Global_Mobility_Report_3_
 mobility$sub_region_1[is.na(mobility$sub_region_1)] <- "country_level"
 mobility <- mobility %>% filter(country_region=="Malaysia", sub_region_1!="country_level")
 mobility$date <- as.Date(mobility$date)
-mobility <- mobility[,-c(1,4,5,6,7)]
+mobility <- mobility[,-c(1,4,5,6,7,8)]
 colnames(mobility) <- c("country","state","date","recreation","grocery", "parks","transit","work","residence")
 
 #statndardise the states
