@@ -63,7 +63,8 @@ clusters <- read_csv("P:/COVID-19/R0 Malaysia/data/cluster data/clusters_dashboa
         tembok_renggam=col_number(), tembok_sgudang=col_number(), tembok_taiping=col_number(),
         bukit_besi=col_number(), pengkalan_chepa=col_number(), tembok_bendera=col_number(),
         jln_awang=col_number(), dti_persiaran_wawasan=col_number(), dti_machap_umboo=col_number(),
-        tembok_muhasabah=col_number(), imigresen_semuja=col_number()))
+        tembok_muhasabah=col_number(), imigresen_semuja=col_number(), dti_juru=col_number(),
+        dti_jln_duta=col_number()))
 
 
 #pull new data set
@@ -91,7 +92,7 @@ df$ins <- df$dti+df$tembok+df$benteng_pk+df$penjara_reman+df$penjara_jawi+df$kep
   df$tembok_gajah + df$kolam_air + df$hala_mutiara + df$pompod + df$pagar_siput + df$pagar_bentong + 
   df$tembok_mempaga + df$telok_mas +df$tropika + df$tembok_kemus + df$tembok_nenas +df$sungai_jelok +df$tembok_renggam +
   df$tembok_sgudang +  df$tembok_taiping + df$bukit_besi + df$pengkalan_chepa + df$tembok_bendera +df$jln_awang + 
-  df$dti_persiaran_wawasan + df$dti_machap_umboo + df$tembok_muhasabah +df$imigresen_semuja
+  df$dti_persiaran_wawasan + df$dti_machap_umboo + df$tembok_muhasabah +df$imigresen_semuja + df$dti_juru + df$ dti_jln_duta
 
 ##########################################################################################
 #arbitrary cut of point for visualisation of clusters with at least 150 cases or more
@@ -211,7 +212,7 @@ ts_mas_short$lower[ts_mas_short$lower<0] <- 0.01
 ################################################################################################################################
 #import the mobility data and get them into states
 #load data
-Global_Mobility_Report_3_ <- read_csv("P:/COVID-19/R0 Malaysia/data/mobility/Global_Mobility_Report_210318.csv", 
+Global_Mobility_Report_3_ <- read_csv("P:/COVID-19/R0 Malaysia/data/mobility/Global_Mobility_Report_210319.csv", 
                                       col_types = cols(census_fips_code = col_character(), 
                                                        date = col_character(), grocery_and_pharmacy_percent_change_from_baseline = col_number(), 
                                                        iso_3166_2_code = col_character(), 
