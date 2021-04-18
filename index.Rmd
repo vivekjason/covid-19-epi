@@ -81,8 +81,8 @@ df <- read_csv("P:/COVID-19/R0 Malaysia/data/incidence/covid-19_my.csv",
 core_set <- df
 
 #cut out the dates to join with cluster
-new <- df[21:as.numeric(Sys.Date()-18260),c(1,3,4,7)] # TODO: if elapsed by a day +1 to the constant (contstant=18260) (+1 for each elapsed day)
-new$no <- seq(1:as.numeric(Sys.Date()-18280)) # TODO: if elapsed by a day +1 to the constant (contstant=18280)  (+1 for each elapsed day)
+new <- df[21:as.numeric(Sys.Date()-18261),c(1,3,4,7)] # TODO: if elapsed by a day +1 to the constant (contstant=18260) (+1 for each elapsed day)
+new$no <- seq(1:as.numeric(Sys.Date()-18281)) # TODO: if elapsed by a day +1 to the constant (contstant=18280)  (+1 for each elapsed day)
 new$date <- as.Date(new$date)
 
 #merge the two sets
@@ -155,7 +155,7 @@ new <- as.data.frame(new)
 
 #create moving averages
 new <- new %>%
-  mutate(daily_ma01 = rollmean(new_cases, k = 5, fill = "extend"))
+  mutate(daily_ma01 = rollmean(new_cases, k = 7, fill = "extend"))
 
 #back convert dates
 new$date <- as.Date(new$date)
@@ -319,7 +319,7 @@ perlis_r0 <- estimate_R(perlis$new_cases,
 #create df of parameters
 plot(perlis_r0)
 perlis_r0_df<- as.data.frame(perlis_r0$R[,c(1:3,5,11)])
-perlis_r0_df$date <- seq(from=as.Date("2020-03-20"),to=as.Date(Sys.Date()),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
+perlis_r0_df$date <- seq(from=as.Date("2020-03-20"),to=as.Date(Sys.Date()-1),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
 perlis_r0_df <- perlis_r0_df[,3:6]
 perlis_r0_df$state <- "Perlis"
 colnames(perlis_r0_df) <- c("rt","lower","upper","date","state")
@@ -347,7 +347,7 @@ perlis_r0_df
 
 #create moving averages
 perlis_r0_df <- perlis_r0_df %>%
-  mutate(daily_ma01 = rollmean(case, k = 5, fill = "extend"))
+  mutate(daily_ma01 = rollmean(case, k = 7, fill = "extend"))
 
 #create a 14-day moving incidence rate
 perlis_r0_df$incident14 <- rollsum(perlis_r0_df$case,k=14,fill=NA, align="right")
@@ -376,7 +376,7 @@ kedah_r0 <- estimate_R(kedah$new_cases,
 #create df of parameters
 plot(kedah_r0)
 kedah_r0_df<- as.data.frame(kedah_r0$R[,c(1:3,5,11)])
-kedah_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
+kedah_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()-1),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
 kedah_r0_df <- kedah_r0_df[,3:6]
 kedah_r0_df$state <- "Kedah"
 colnames(kedah_r0_df) <- c("rt","lower","upper","date","state")
@@ -404,7 +404,7 @@ kedah_r0_df
 
 #create moving averages
 kedah_r0_df <- kedah_r0_df %>%
-  mutate(daily_ma01 = rollmean(case, k = 5, fill = "extend"))
+  mutate(daily_ma01 = rollmean(case, k = 7, fill = "extend"))
 
 #create a 14-day moving incidence rate
 kedah_r0_df$incident14 <- rollsum(kedah_r0_df$case,k=14,fill=NA, align="right")
@@ -434,7 +434,7 @@ penang_r0 <- estimate_R(penang$new_cases,
 #create df of parameters
 plot(penang_r0)
 penang_r0_df<- as.data.frame(penang_r0$R[,c(1:3,5,11)])
-penang_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
+penang_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()-1),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
 penang_r0_df <- penang_r0_df[,3:6]
 penang_r0_df$state <- "Pulau Pinang"
 colnames(penang_r0_df) <- c("rt","lower","upper","date","state")
@@ -462,7 +462,7 @@ penang_r0_df
 
 #create moving averages
 penang_r0_df <- penang_r0_df %>%
-  mutate(daily_ma01 = rollmean(case, k = 5, fill = "extend"))
+  mutate(daily_ma01 = rollmean(case, k = 7, fill = "extend"))
 
 #create a 14-day moving incidence rate
 penang_r0_df$incident14 <- rollsum(penang_r0_df$case,k=14,fill=NA, align="right")
@@ -492,7 +492,7 @@ perak_r0 <- estimate_R(perak$new_cases,
 #create df of parameters
 plot(perak_r0)
 perak_r0_df<- as.data.frame(perak_r0$R[,c(1:3,5,11)])
-perak_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
+perak_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()-1),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
 perak_r0_df <- perak_r0_df[,3:6]
 perak_r0_df$state <- "Perak"
 colnames(perak_r0_df) <- c("rt","lower","upper","date","state")
@@ -520,7 +520,7 @@ perak_r0_df
 
 #create moving averages
 perak_r0_df <- perak_r0_df %>%
-  mutate(daily_ma01 = rollmean(case, k = 5, fill = "extend"))
+  mutate(daily_ma01 = rollmean(case, k = 7, fill = "extend"))
 
 #create a 14-day moving incidence rate
 perak_r0_df$incident14 <- rollsum(perak_r0_df$case,k=14,fill=NA, align="right")
@@ -550,7 +550,7 @@ selangor_r0 <- estimate_R(selangor$new_cases,
 #create df of parameters
 plot(selangor_r0)
 selangor_r0_df<- as.data.frame(selangor_r0$R[,c(1:3,5,11)])
-selangor_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)  
+selangor_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()-1),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)  
 selangor_r0_df <- selangor_r0_df[,3:6]
 selangor_r0_df$state <- "Selangor"
 colnames(selangor_r0_df) <- c("rt","lower","upper","date","state")
@@ -578,7 +578,7 @@ selangor_r0_df
 
 #create moving averages
 selangor_r0_df <- selangor_r0_df %>%
-  mutate(daily_ma01 = rollmean(case, k = 5, fill = "extend"))
+  mutate(daily_ma01 = rollmean(case, k = 7, fill = "extend"))
 
 #create a 14-day moving incidence rate
 selangor_r0_df$incident14 <- rollsum(selangor_r0_df$case,k=14,fill=NA, align="right")
@@ -607,7 +607,7 @@ kl_r0 <- estimate_R(kl$new_cases,
 #create df of parameters
 plot(kl_r0)
 kl_r0_df<- as.data.frame(kl_r0$R[,c(1:3,5,11)])
-kl_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
+kl_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()-1),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
 kl_r0_df <- kl_r0_df[,3:6]
 kl_r0_df$state <- "W.P. Kuala Lumpur"
 colnames(kl_r0_df) <- c("rt","lower","upper","date","state")
@@ -635,7 +635,7 @@ kl_r0_df
 
 #create moving averages
 kl_r0_df <- kl_r0_df %>%
-  mutate(daily_ma01 = rollmean(case, k = 5, fill = "extend"))
+  mutate(daily_ma01 = rollmean(case, k = 7, fill = "extend"))
 
 #create a 14-day moving incidence rate
 kl_r0_df$incident14 <- rollsum(kl_r0_df$case,k=14,fill=NA, align="right")
@@ -664,7 +664,7 @@ putrajaya_r0 <- estimate_R(putrajaya$new_cases,
 #create df of parameters
 plot(putrajaya_r0)
 putrajaya_r0_df<- as.data.frame(putrajaya_r0$R[,c(1:3,5,11)])
-putrajaya_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
+putrajaya_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()-1),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
 putrajaya_r0_df <- putrajaya_r0_df[,3:6]
 putrajaya_r0_df$state <- "W.P. Putrajaya"
 colnames(putrajaya_r0_df) <- c("rt","lower","upper","date","state")
@@ -692,7 +692,7 @@ putrajaya_r0_df
 
 #create moving averages
 putrajaya_r0_df <- putrajaya_r0_df %>%
-  mutate(daily_ma01 = rollmean(case, k = 5, fill = "extend"))
+  mutate(daily_ma01 = rollmean(case, k = 7, fill = "extend"))
 
 #create a 14-day moving incidence rate
 putrajaya_r0_df$incident14 <- rollsum(putrajaya_r0_df$case,k=14,fill=NA, align="right")
@@ -721,7 +721,7 @@ negeri_r0 <- estimate_R(negeri$new_cases,
 #create df of parameters
 plot(negeri_r0)
 negeri_r0_df<- as.data.frame(negeri_r0$R[,c(1:3,5,11)])
-negeri_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
+negeri_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()-1),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
 negeri_r0_df <- negeri_r0_df[,3:6]
 negeri_r0_df$state <- "Negeri Sembilan"
 colnames(negeri_r0_df) <- c("rt","lower","upper","date","state")
@@ -749,7 +749,7 @@ negeri_r0_df
 
 #create moving averages
 negeri_r0_df <- negeri_r0_df %>%
-  mutate(daily_ma01 = rollmean(case, k = 5, fill = "extend"))
+  mutate(daily_ma01 = rollmean(case, k = 7, fill = "extend"))
 
 #create a 14-day moving incidence rate
 negeri_r0_df$incident14 <- rollsum(negeri_r0_df$case,k=14,fill=NA, align="right")
@@ -778,7 +778,7 @@ melaka_r0 <- estimate_R(melaka$new_cases,
 #create df of parameters
 plot(melaka_r0)
 melaka_r0_df<- as.data.frame(melaka_r0$R[,c(1:3,5,11)])
-melaka_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
+melaka_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()-1),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
 melaka_r0_df <- melaka_r0_df[,3:6]
 melaka_r0_df$state <- "Melaka"
 colnames(melaka_r0_df) <- c("rt","lower","upper","date","state")
@@ -806,7 +806,7 @@ melaka_r0_df
 
 #create moving averages
 melaka_r0_df <- melaka_r0_df %>%
-  mutate(daily_ma01 = rollmean(case, k = 5, fill = "extend"))
+  mutate(daily_ma01 = rollmean(case, k = 7, fill = "extend"))
 
 #create a 14-day moving incidence rate
 melaka_r0_df$incident14 <- rollsum(melaka_r0_df$case,k=14,fill=NA, align="right")
@@ -836,7 +836,7 @@ johor_r0 <- estimate_R(johor$new_cases,
 #create df of parameters
 plot(johor_r0)
 johor_r0_df<- as.data.frame(johor_r0$R[,c(1:3,5,11)])
-johor_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day) 
+johor_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()-1),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day) 
 johor_r0_df <- johor_r0_df[,3:6]
 johor_r0_df$state <- "Johor"
 colnames(johor_r0_df) <- c("rt","lower","upper","date","state")
@@ -864,7 +864,7 @@ johor_r0_df
 
 #create moving averages
 johor_r0_df <- johor_r0_df %>%
-  mutate(daily_ma01 = rollmean(case, k = 5, fill = "extend"))
+  mutate(daily_ma01 = rollmean(case, k = 7, fill = "extend"))
 
 
 #create a 14-day moving incidence rate
@@ -894,7 +894,7 @@ pahang_r0 <- estimate_R(pahang$new_cases,
 #create df of parameters
 plot(pahang_r0)
 pahang_r0_df<- as.data.frame(pahang_r0$R[,c(1:3,5,11)])
-pahang_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
+pahang_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()-1),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
 pahang_r0_df <- pahang_r0_df[,3:6]
 pahang_r0_df$state <- "Pahang"
 colnames(pahang_r0_df) <- c("rt","lower","upper","date","state")
@@ -922,7 +922,7 @@ pahang_r0_df
 
 #create moving averages
 pahang_r0_df <- pahang_r0_df %>%
-  mutate(daily_ma01 = rollmean(case, k = 5, fill = "extend"))
+  mutate(daily_ma01 = rollmean(case, k = 7, fill = "extend"))
 
 #create a 14-day moving incidence rate
 pahang_r0_df$incident14 <- rollsum(pahang_r0_df$case,k=14,fill=NA, align="right")
@@ -951,7 +951,7 @@ terengganu_r0 <- estimate_R(terengganu$new_cases,
 #create df of parameters
 plot(terengganu_r0)
 terengganu_r0_df<- as.data.frame(terengganu_r0$R[,c(1:3,5,11)])
-terengganu_r0_df$date <- seq(from=as.Date("2020-03-20"),to=as.Date(Sys.Date()),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
+terengganu_r0_df$date <- seq(from=as.Date("2020-03-20"),to=as.Date(Sys.Date()-1),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
 terengganu_r0_df <- terengganu_r0_df[,3:6]
 terengganu_r0_df$state <- "Terengganu"
 colnames(terengganu_r0_df) <- c("rt","lower","upper","date","state")
@@ -979,7 +979,7 @@ terengganu_r0_df
 
 #create moving averages
 terengganu_r0_df <- terengganu_r0_df %>%
-  mutate(daily_ma01 = rollmean(case, k = 5, fill = "extend"))
+  mutate(daily_ma01 = rollmean(case, k = 7, fill = "extend"))
 
 #create a 14-day moving incidence rate
 terengganu_r0_df$incident14 <- rollsum(terengganu_r0_df$case,k=14,fill=NA, align="right")
@@ -1008,7 +1008,7 @@ kelantan_r0 <- estimate_R(kelantan$new_cases,
 #create df of parameters
 plot(kelantan_r0)
 kelantan_r0_df<- as.data.frame(kelantan_r0$R[,c(1:3,5,11)])
-kelantan_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
+kelantan_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()-1),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
 kelantan_r0_df <- kelantan_r0_df[,3:6]
 kelantan_r0_df$state <- "Kelantan"
 colnames(kelantan_r0_df) <- c("rt","lower","upper","date","state")
@@ -1036,7 +1036,7 @@ kelantan_r0_df
 
 #create moving averages
 kelantan_r0_df <- kelantan_r0_df %>%
-  mutate(daily_ma01 = rollmean(case, k = 5, fill = "extend"))
+  mutate(daily_ma01 = rollmean(case, k = 7, fill = "extend"))
 
 #create a 14-day moving incidence rate
 kelantan_r0_df$incident14 <- rollsum(kelantan_r0_df$case,k=14,fill=NA, align="right")
@@ -1065,7 +1065,7 @@ sabah_r0 <- estimate_R(sabah$new_cases,
 #create df of parameters
 plot(sabah_r0)
 sabah_r0_df<- as.data.frame(sabah_r0$R[,c(1:3,5,11)])
-sabah_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
+sabah_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()-1),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
 sabah_r0_df <- sabah_r0_df[,3:6]
 sabah_r0_df$state <- "Sabah"
 colnames(sabah_r0_df) <- c("rt","lower","upper","date","state")
@@ -1094,7 +1094,7 @@ sabah_r0_df
 
 #create moving averages
 sabah_r0_df <- sabah_r0_df %>%
-  mutate(daily_ma01 = rollmean(case, k = 5, fill = "extend"))
+  mutate(daily_ma01 = rollmean(case, k = 7, fill = "extend"))
 
 #create a 14-day moving incidence rate
 sabah_r0_df$incident14 <- rollsum(sabah_r0_df$case,k=14,fill=NA, align="right")
@@ -1124,7 +1124,7 @@ sarawak_r0 <- estimate_R(sarawak$new_cases,
 #create df of parameters
 plot(sarawak_r0)
 sarawak_r0_df<- as.data.frame(sarawak_r0$R[,c(1:3,5,11)])
-sarawak_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
+sarawak_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()-1),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
 sarawak_r0_df <- sarawak_r0_df[,3:6]
 sarawak_r0_df$state <- "Sarawak"
 colnames(sarawak_r0_df) <- c("rt","lower","upper","date","state")
@@ -1152,7 +1152,7 @@ sarawak_r0_df
 
 #create moving averages
 sarawak_r0_df <- sarawak_r0_df %>%
-  mutate(daily_ma01 = rollmean(case, k = 5, fill = "extend"))
+  mutate(daily_ma01 = rollmean(case, k = 7, fill = "extend"))
 
 #create a 14-day moving incidence rate
 sarawak_r0_df$incident14 <- rollsum(sarawak_r0_df$case,k=14,fill=NA, align="right")
@@ -1181,7 +1181,7 @@ labuan_r0 <- estimate_R(labuan$new_cases,
 #create df of parameters
 plot(labuan_r0)
 labuan_r0_df<- as.data.frame(labuan_r0$R[,c(1:3,5,11)])
-labuan_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day) 
+labuan_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()-1),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day) 
 labuan_r0_df <- labuan_r0_df[,3:6]
 labuan_r0_df$state <- "W.P. Labuan"
 colnames(labuan_r0_df) <- c("rt","lower","upper","date","state")
@@ -1210,7 +1210,7 @@ labuan_r0_df
 
 #create moving averages
 labuan_r0_df <- labuan_r0_df %>%
-  mutate(daily_ma01 = rollmean(case, k = 5, fill = "extend"))
+  mutate(daily_ma01 = rollmean(case, k = 7, fill = "extend"))
 
 #create a 14-day moving incidence rate
 labuan_r0_df$incident14 <- rollsum(labuan_r0_df$case,k=14,fill=NA, align="right")
@@ -1580,15 +1580,15 @@ l <- list(
 
 #plotly cannot read scale label- change column name
 names(ts_mas)[names(ts_mas)=="new"] <- "Daily New Cases"
-names(ts_mas)[names(ts_mas)=="daily_ma1"] <- "5-day moving average"
+names(ts_mas)[names(ts_mas)=="daily_ma1"] <- "7-day moving average"
 
 ##sub plot b - epid curve, ma and rt- modified version
 mas_epid_curve <- ggplot(data=ts_mas,aes(x=date)) +
   geom_bar(aes(y=`Daily New Cases`,col="Daily New Cases"),stat="identity",alpha=0.7, show.legend = T) + 
-  geom_line(aes(y=`5-day moving average`,col="5-day moving average"), size=0.8)+
-  scale_colour_manual(name = "",labels = c("5-day moving average"="5-day moving average",
+  geom_line(aes(y=`7-day moving average`,col="7-day moving average"), size=0.8)+
+  scale_colour_manual(name = "",labels = c("7-day moving average"="7-day moving average",
                                  "Daily New Cases"="Daily New Cases"),
-                      values = c("Daily New Cases"="transparent", "5-day moving average"="royalblue3")) +
+                      values = c("Daily New Cases"="transparent", "7-day moving average"="royalblue3")) +
   theme_minimal() +
   theme(legend.position = c(.95, .5),
         legend.justification = c("right", "top"),
@@ -1638,7 +1638,7 @@ ggplotly(mas_epid_curve) %>% layout(
 ```{r}
 #plotly cannot read scale label- change column name
 names(ts_mas)[names(ts_mas)=="active"] <- "Active Cases"
-names(ts_mas)[names(ts_mas)=="daily_ma1"] <- "5-day moving average"
+names(ts_mas)[names(ts_mas)=="daily_ma1"] <- "7-day moving average"
 
 ##sub plot b - epid curve, ma and rt- modified version
 mas_epid_curve <- ggplot(data=ts_mas,aes(x=date)) +
@@ -1694,15 +1694,15 @@ Row {.tabset}
 ```{r}
 #plotly cannot read scale label- change column name
 names(perlis)[names(perlis)=="case"] <- "Daily New Cases"
-names(perlis)[names(perlis)=="daily_ma01"] <- "5-day moving average"
+names(perlis)[names(perlis)=="daily_ma01"] <- "7-day moving average"
 
 ##sub plot b - epid curve, ma and rt- modified version
 perlis_epid_curve <- ggplot(data=perlis,aes(x=date)) +
   geom_bar(aes(y=`Daily New Cases`,col="Daily New Cases"),stat="identity",alpha=0.7, show.legend = T) + 
-  geom_line(aes(y=`5-day moving average`,col="5-day moving average"), size=0.8)+
-  scale_colour_manual(name = "",labels = c("5-day moving average"="5-day moving average",
+  geom_line(aes(y=`7-day moving average`,col="7-day moving average"), size=0.8)+
+  scale_colour_manual(name = "",labels = c("7-day moving average"="7-day moving average",
                                  "Daily New Cases"="Daily New Cases"),
-                      values = c("Daily New Cases"="transparent", "5-day moving average"="seagreen2")) +
+                      values = c("Daily New Cases"="transparent", "7-day moving average"="seagreen2")) +
   theme_minimal() +
   theme(legend.position = c(.95, .5),
         legend.justification = c("right", "top"),
@@ -1752,15 +1752,15 @@ ggplotly(perlis_epid_curve) %>% layout(
 ```{r}
 #plotly cannot read scale label- change column name
 names(kedah)[names(kedah)=="case"] <- "Daily New Cases"
-names(kedah)[names(kedah)=="daily_ma01"] <- "5-day moving average"
+names(kedah)[names(kedah)=="daily_ma01"] <- "7-day moving average"
 
 ##sub plot b - epid curve, ma and rt- modified version
 kedah_epid_curve <- ggplot(data=kedah,aes(x=date)) +
   geom_bar(aes(y=`Daily New Cases`,col="Daily New Cases"),stat="identity",alpha=0.7, show.legend = T) + 
-  geom_line(aes(y=`5-day moving average`,col="5-day moving average"), size=0.8)+
-  scale_colour_manual(name = "",labels = c("5-day moving average"="5-day moving average",
+  geom_line(aes(y=`7-day moving average`,col="7-day moving average"), size=0.8)+
+  scale_colour_manual(name = "",labels = c("7-day moving average"="7-day moving average",
                                  "Daily New Cases"="Daily New Cases"),
-                      values = c("Daily New Cases"="transparent", "5-day moving average"="seagreen2")) +
+                      values = c("Daily New Cases"="transparent", "7-day moving average"="seagreen2")) +
   theme_minimal() +
   theme(legend.position = c(.95, .5),
         legend.justification = c("right", "top"),
@@ -1810,15 +1810,15 @@ ggplotly(kedah_epid_curve) %>% layout(
 ```{r}
 #plotly cannot read scale label- change column name
 names(penang)[names(penang)=="case"] <- "Daily New Cases"
-names(penang)[names(penang)=="daily_ma01"] <- "5-day moving average"
+names(penang)[names(penang)=="daily_ma01"] <- "7-day moving average"
 
 ##sub plot b - epid curve, ma and rt- modified version
 penang_epid_curve <- ggplot(data=penang,aes(x=date)) +
   geom_bar(aes(y=`Daily New Cases`,col="Daily New Cases"),stat="identity",alpha=0.7, show.legend = T) + 
-  geom_line(aes(y=`5-day moving average`,col="5-day moving average"), size=0.8)+
-  scale_colour_manual(name = "",labels = c("5-day moving average"="5-day moving average",
+  geom_line(aes(y=`7-day moving average`,col="7-day moving average"), size=0.8)+
+  scale_colour_manual(name = "",labels = c("7-day moving average"="7-day moving average",
                                  "Daily New Cases"="Daily New Cases"),
-                      values = c("Daily New Cases"="transparent", "5-day moving average"="seagreen2")) +
+                      values = c("Daily New Cases"="transparent", "7-day moving average"="seagreen2")) +
   theme_minimal() +
   theme(legend.position = c(.95, .5),
         legend.justification = c("right", "top"),
@@ -1868,15 +1868,15 @@ ggplotly(penang_epid_curve) %>% layout(
 ```{r}
 #plotly cannot read scale label- change column name
 names(perak)[names(perak)=="case"] <- "Daily New Cases"
-names(perak)[names(perak)=="daily_ma01"] <- "5-day moving average"
+names(perak)[names(perak)=="daily_ma01"] <- "7-day moving average"
 
 ##sub plot b - epid curve, ma and rt- modified version
 perak_epid_curve <- ggplot(data=perak,aes(x=date)) +
   geom_bar(aes(y=`Daily New Cases`,col="Daily New Cases"),stat="identity",alpha=0.7, show.legend = T) + 
-  geom_line(aes(y=`5-day moving average`,col="5-day moving average"), size=0.8)+
-  scale_colour_manual(name = "",labels = c("5-day moving average"="5-day moving average",
+  geom_line(aes(y=`7-day moving average`,col="7-day moving average"), size=0.8)+
+  scale_colour_manual(name = "",labels = c("7-day moving average"="7-day moving average",
                                  "Daily New Cases"="Daily New Cases"),
-                      values = c("Daily New Cases"="transparent", "5-day moving average"="seagreen2")) +
+                      values = c("Daily New Cases"="transparent", "7-day moving average"="seagreen2")) +
   theme_minimal() +
   theme(legend.position = c(.95, .5),
         legend.justification = c("right", "top"),
@@ -1926,15 +1926,15 @@ ggplotly(perak_epid_curve) %>% layout(
 ```{r}
 #plotly cannot read scale label- change column name
 names(selangor)[names(selangor)=="case"] <- "Daily New Cases"
-names(selangor)[names(selangor)=="daily_ma01"] <- "5-day moving average"
+names(selangor)[names(selangor)=="daily_ma01"] <- "7-day moving average"
 
 ##sub plot b - epid curve, ma and rt- modified version
 selangor_epid_curve <- ggplot(data=selangor,aes(x=date)) +
   geom_bar(aes(y=`Daily New Cases`,col="Daily New Cases"),stat="identity",alpha=0.7, show.legend = T) + 
-  geom_line(aes(y=`5-day moving average`,col="5-day moving average"), size=0.8)+
-  scale_colour_manual(name = "",labels = c("5-day moving average"="5-day moving average",
+  geom_line(aes(y=`7-day moving average`,col="7-day moving average"), size=0.8)+
+  scale_colour_manual(name = "",labels = c("7-day moving average"="7-day moving average",
                                  "Daily New Cases"="Daily New Cases"),
-                      values = c("Daily New Cases"="transparent", "5-day moving average"="seagreen2")) +
+                      values = c("Daily New Cases"="transparent", "7-day moving average"="seagreen2")) +
   theme_minimal() +
   theme(legend.position = c(.95, .5),
         legend.justification = c("right", "top"),
@@ -1983,15 +1983,15 @@ ggplotly(selangor_epid_curve) %>% layout(
 ```{r}
 #plotly cannot read scale label- change column name
 names(kl)[names(kl)=="case"] <- "Daily New Cases"
-names(kl)[names(kl)=="daily_ma01"] <- "5-day moving average"
+names(kl)[names(kl)=="daily_ma01"] <- "7-day moving average"
 
 ##sub plot b - epid curve, ma and rt- modified version
 kl_epid_curve <- ggplot(data=kl,aes(x=date)) +
   geom_bar(aes(y=`Daily New Cases`,col="Daily New Cases"),stat="identity",alpha=0.7, show.legend = T) + 
-  geom_line(aes(y=`5-day moving average`,col="5-day moving average"), size=0.8)+
-  scale_colour_manual(name = "",labels = c("5-day moving average"="5-day moving average",
+  geom_line(aes(y=`7-day moving average`,col="7-day moving average"), size=0.8)+
+  scale_colour_manual(name = "",labels = c("7-day moving average"="7-day moving average",
                                  "Daily New Cases"="Daily New Cases"),
-                      values = c("Daily New Cases"="transparent", "5-day moving average"="seagreen2"))+
+                      values = c("Daily New Cases"="transparent", "7-day moving average"="seagreen2"))+
   theme_minimal() +
   theme(legend.position = c(.95, .5),
         legend.justification = c("right", "top"),
@@ -2040,15 +2040,15 @@ ggplotly(kl_epid_curve) %>% layout(
 ```{r}
 #plotly cannot read scale label- change column name
 names(putrajaya)[names(putrajaya)=="case"] <- "Daily New Cases"
-names(putrajaya)[names(putrajaya)=="daily_ma01"] <- "5-day moving average"
+names(putrajaya)[names(putrajaya)=="daily_ma01"] <- "7-day moving average"
 
 ##sub plot b - epid curve, ma and rt- modified version
 putrajaya_epid_curve <- ggplot(data=putrajaya,aes(x=date)) +
   geom_bar(aes(y=`Daily New Cases`,col="Daily New Cases"),stat="identity",alpha=0.7, show.legend = T) + 
-  geom_line(aes(y=`5-day moving average`,col="5-day moving average"), size=0.8)+
-  scale_colour_manual(name = "",labels = c("5-day moving average"="5-day moving average",
+  geom_line(aes(y=`7-day moving average`,col="7-day moving average"), size=0.8)+
+  scale_colour_manual(name = "",labels = c("7-day moving average"="7-day moving average",
                                  "Daily New Cases"="Daily New Cases"),
-                      values = c("Daily New Cases"="transparent", "5-day moving average"="seagreen2"))+
+                      values = c("Daily New Cases"="transparent", "7-day moving average"="seagreen2"))+
   theme_minimal() +
   theme(legend.position = c(.95, .5),
         legend.justification = c("right", "top"),
@@ -2097,15 +2097,15 @@ ggplotly(putrajaya_epid_curve) %>% layout(
 ```{r}
 #plotly cannot read scale label- change column name
 names(melaka)[names(melaka)=="case"] <- "Daily New Cases"
-names(melaka)[names(melaka)=="daily_ma01"] <- "5-day moving average"
+names(melaka)[names(melaka)=="daily_ma01"] <- "7-day moving average"
 
 ##sub plot b - epid curve, ma and rt- modified version
 melaka_epid_curve <- ggplot(data=melaka,aes(x=date)) +
   geom_bar(aes(y=`Daily New Cases`,col="Daily New Cases"),stat="identity",alpha=0.7, show.legend = T) + 
-  geom_line(aes(y=`5-day moving average`,col="5-day moving average"), size=0.8)+
-  scale_colour_manual(name = "",labels = c("5-day moving average"="5-day moving average",
+  geom_line(aes(y=`7-day moving average`,col="7-day moving average"), size=0.8)+
+  scale_colour_manual(name = "",labels = c("7-day moving average"="7-day moving average",
                                  "Daily New Cases"="Daily New Cases"),
-                      values = c("Daily New Cases"="transparent", "5-day moving average"="seagreen2")) +
+                      values = c("Daily New Cases"="transparent", "7-day moving average"="seagreen2")) +
   theme_minimal() +
   theme(legend.position = c(.95, .5),
         legend.justification = c("right", "top"),
@@ -2153,15 +2153,15 @@ ggplotly(melaka_epid_curve) %>% layout(
 ### Negeri Sembilan {.no-mobile}
 ```{r}
 names(negeri)[names(negeri)=="case"] <- "Daily New Cases"
-names(negeri)[names(negeri)=="daily_ma01"] <- "5-day moving average"
+names(negeri)[names(negeri)=="daily_ma01"] <- "7-day moving average"
 
 ##sub plot b - epid curve, ma and rt- modified version
 negeri_epid_curve <- ggplot(data=negeri,aes(x=date)) +
   geom_bar(aes(y=`Daily New Cases`,col="Daily New Cases"),stat="identity",alpha=0.7, show.legend = T) + 
-  geom_line(aes(y=`5-day moving average`,col="5-day moving average"), size=0.8)+
-  scale_colour_manual(name = "",labels = c("5-day moving average"="5-day moving average",
+  geom_line(aes(y=`7-day moving average`,col="7-day moving average"), size=0.8)+
+  scale_colour_manual(name = "",labels = c("7-day moving average"="7-day moving average",
                                  "Daily New Cases"="Daily New Cases"),
-                      values = c("Daily New Cases"="transparent", "5-day moving average"="seagreen2")) +
+                      values = c("Daily New Cases"="transparent", "7-day moving average"="seagreen2")) +
   theme_minimal() +
   theme(legend.position = c(.95, .5),
         legend.justification = c("right", "top"),
@@ -2209,15 +2209,15 @@ ggplotly(negeri_epid_curve) %>% layout(
 ### Johor {.no-mobile}
 ```{r}
 names(johor)[names(johor)=="case"] <- "Daily New Cases"
-names(johor)[names(johor)=="daily_ma01"] <- "5-day moving average"
+names(johor)[names(johor)=="daily_ma01"] <- "7-day moving average"
 
 ##sub plot b - epid curve, ma and rt- modified version
 johor_epid_curve <- ggplot(data=johor,aes(x=date)) +
   geom_bar(aes(y=`Daily New Cases`,col="Daily New Cases"),stat="identity",alpha=0.7, show.legend = T) + 
-  geom_line(aes(y=`5-day moving average`,col="5-day moving average"), size=0.8)+
-  scale_colour_manual(name = "",labels = c("5-day moving average"="5-day moving average",
+  geom_line(aes(y=`7-day moving average`,col="7-day moving average"), size=0.8)+
+  scale_colour_manual(name = "",labels = c("7-day moving average"="7-day moving average",
                                  "Daily New Cases"="Daily New Cases"),
-                      values = c("Daily New Cases"="transparent", "5-day moving average"="seagreen2")) +
+                      values = c("Daily New Cases"="transparent", "7-day moving average"="seagreen2")) +
   theme_minimal() +
   theme(legend.position = c(.95, .5),
         legend.justification = c("right", "top"),
@@ -2265,15 +2265,15 @@ ggplotly(johor_epid_curve) %>% layout(
 ### Pahang {.no-mobile}
 ```{r}
 names(pahang)[names(pahang)=="case"] <- "Daily New Cases"
-names(pahang)[names(pahang)=="daily_ma01"] <- "5-day moving average"
+names(pahang)[names(pahang)=="daily_ma01"] <- "7-day moving average"
 
 ##sub plot b - epid curve, ma and rt- modified version
 pahang_epid_curve <- ggplot(data=pahang,aes(x=date)) +
   geom_bar(aes(y=`Daily New Cases`,col="Daily New Cases"),stat="identity",alpha=0.7, show.legend = T) + 
-  geom_line(aes(y=`5-day moving average`,col="5-day moving average"), size=0.8)+
-  scale_colour_manual(name = "",labels = c("5-day moving average"="5-day moving average",
+  geom_line(aes(y=`7-day moving average`,col="7-day moving average"), size=0.8)+
+  scale_colour_manual(name = "",labels = c("7-day moving average"="7-day moving average",
                                  "Daily New Cases"="Daily New Cases"),
-                      values = c("Daily New Cases"="transparent", "5-day moving average"="seagreen2"))+
+                      values = c("Daily New Cases"="transparent", "7-day moving average"="seagreen2"))+
   theme_minimal() +
   theme(legend.position = c(.95, .5),
         legend.justification = c("right", "top"),
@@ -2321,15 +2321,15 @@ ggplotly(pahang_epid_curve) %>% layout(
 ### Terengganu {.no-mobile}
 ```{r}
 names(terengganu)[names(terengganu)=="case"] <- "Daily New Cases"
-names(terengganu)[names(terengganu)=="daily_ma01"] <- "5-day moving average"
+names(terengganu)[names(terengganu)=="daily_ma01"] <- "7-day moving average"
 
 ##sub plot b - epid curve, ma and rt- modified version
 terengganu_epid_curve <- ggplot(data=terengganu,aes(x=date)) +
   geom_bar(aes(y=`Daily New Cases`,col="Daily New Cases"),stat="identity",alpha=0.7, show.legend = T) + 
-  geom_line(aes(y=`5-day moving average`,col="5-day moving average"), size=0.8)+
-  scale_colour_manual(name = "",labels = c("5-day moving average"="5-day moving average",
+  geom_line(aes(y=`7-day moving average`,col="7-day moving average"), size=0.8)+
+  scale_colour_manual(name = "",labels = c("7-day moving average"="7-day moving average",
                                  "Daily New Cases"="Daily New Cases"),
-                      values = c("Daily New Cases"="transparent", "5-day moving average"="seagreen2")) +
+                      values = c("Daily New Cases"="transparent", "7-day moving average"="seagreen2")) +
   theme_minimal() +
   theme(legend.position = c(.95, .5),
         legend.justification = c("right", "top"),
@@ -2377,15 +2377,15 @@ ggplotly(terengganu_epid_curve)%>% layout(
 ### Kelantan {.no-mobile}
 ```{r}
 names(kelantan)[names(kelantan)=="case"] <- "Daily New Cases"
-names(kelantan)[names(kelantan)=="daily_ma01"] <- "5-day moving average"
+names(kelantan)[names(kelantan)=="daily_ma01"] <- "7-day moving average"
 
 ##sub plot b - epid curve, ma and rt- modified version
 kelantan_epid_curve <- ggplot(data=kelantan,aes(x=date)) +
   geom_bar(aes(y=`Daily New Cases`,col="Daily New Cases"),stat="identity",alpha=0.7, show.legend = T) + 
-  geom_line(aes(y=`5-day moving average`,col="5-day moving average"), size=0.8)+
-  scale_colour_manual(name = "",labels = c("5-day moving average"="5-day moving average",
+  geom_line(aes(y=`7-day moving average`,col="7-day moving average"), size=0.8)+
+  scale_colour_manual(name = "",labels = c("7-day moving average"="7-day moving average",
                                  "Daily New Cases"="Daily New Cases"),
-                      values = c("Daily New Cases"="transparent", "5-day moving average"="seagreen2")) +
+                      values = c("Daily New Cases"="transparent", "7-day moving average"="seagreen2")) +
   theme_minimal() +
   theme(legend.position = c(.95, .5),
         legend.justification = c("right", "top"),
@@ -2433,15 +2433,15 @@ ggplotly(kelantan_epid_curve)%>% layout(
 ### Sarawak {.no-mobile}
 ```{r}
 names(sarawak)[names(sarawak)=="case"] <- "Daily New Cases"
-names(sarawak)[names(sarawak)=="daily_ma01"] <- "5-day moving average"
+names(sarawak)[names(sarawak)=="daily_ma01"] <- "7-day moving average"
 
 ##sub plot b - epid curve, ma and rt- modified version
 sarawak_epid_curve <- ggplot(data=sarawak,aes(x=date)) +
   geom_bar(aes(y=`Daily New Cases`,col="Daily New Cases"),stat="identity",alpha=0.7, show.legend = T) + 
-  geom_line(aes(y=`5-day moving average`,col="5-day moving average"), size=0.8)+
-  scale_colour_manual(name = "",labels = c("5-day moving average"="5-day moving average",
+  geom_line(aes(y=`7-day moving average`,col="7-day moving average"), size=0.8)+
+  scale_colour_manual(name = "",labels = c("7-day moving average"="7-day moving average",
                                  "Daily New Cases"="Daily New Cases"),
-                      values = c("Daily New Cases"="transparent", "5-day moving average"="seagreen2")) +
+                      values = c("Daily New Cases"="transparent", "7-day moving average"="seagreen2")) +
   theme_minimal() +
   theme(legend.position = c(.95, .5),
         legend.justification = c("right", "top"),
@@ -2489,15 +2489,15 @@ ggplotly(sarawak_epid_curve)%>% layout(
 ### Sabah {.no-mobile}
 ```{r}
 names(sabah)[names(sabah)=="case"] <- "Daily New Cases"
-names(sabah)[names(sabah)=="daily_ma01"] <- "5-day moving average"
+names(sabah)[names(sabah)=="daily_ma01"] <- "7-day moving average"
 
 ##sub plot b - epid curve, ma and rt- modified version
 sabah_epid_curve <- ggplot(data=sabah,aes(x=date)) +
   geom_bar(aes(y=`Daily New Cases`,col="Daily New Cases"),stat="identity",alpha=0.7, show.legend = T) + 
-  geom_line(aes(y=`5-day moving average`,col="5-day moving average"), size=0.8)+
-  scale_colour_manual(name = "",labels = c("5-day moving average"="5-day moving average",
+  geom_line(aes(y=`7-day moving average`,col="7-day moving average"), size=0.8)+
+  scale_colour_manual(name = "",labels = c("7-day moving average"="7-day moving average",
                                  "Daily New Cases"="Daily New Cases"),
-                      values = c("Daily New Cases"="transparent", "5-day moving average"="seagreen2")) +
+                      values = c("Daily New Cases"="transparent", "7-day moving average"="seagreen2")) +
   theme_minimal() +
   theme(legend.position = c(.95, .5),
         legend.justification = c("right", "top"),
@@ -2545,15 +2545,15 @@ ggplotly(sabah_epid_curve)%>% layout(
 ### W.P. Labuan {.no-mobile}
 ```{r}
 names(labuan)[names(labuan)=="case"] <- "Daily New Cases"
-names(labuan)[names(labuan)=="daily_ma01"] <- "5-day moving average"
+names(labuan)[names(labuan)=="daily_ma01"] <- "7-day moving average"
 
 ##sub plot b - epid curve, ma and rt- modified version
 labuan_epid_curve <- ggplot(data=labuan,aes(x=date)) +
   geom_bar(aes(y=`Daily New Cases`,col="Daily New Cases"),stat="identity",alpha=0.7, show.legend = T) + 
-  geom_line(aes(y=`5-day moving average`,col="5-day moving average"), size=0.8)+
-  scale_colour_manual(name = "",labels = c("5-day moving average"="5-day moving average",
+  geom_line(aes(y=`7-day moving average`,col="7-day moving average"), size=0.8)+
+  scale_colour_manual(name = "",labels = c("7-day moving average"="7-day moving average",
                                  "Daily New Cases"="Daily New Cases"),
-                      values = c("Daily New Cases"="transparent", "5-day moving average"="seagreen2")) +
+                      values = c("Daily New Cases"="transparent", "7-day moving average"="seagreen2")) +
   theme_minimal() +
   theme(legend.position = c(.95, .5),
         legend.justification = c("right", "top"),
