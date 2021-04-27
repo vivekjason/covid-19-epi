@@ -220,7 +220,7 @@ ts_mas_short$lower[ts_mas_short$lower<0] <- 0.01
 #https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
 
 #load data
-Global_Mobility_Report_3_ <- read_csv("P:/COVID-19/R0 Malaysia/data/mobility/Global_Mobility_Report_210426.csv", 
+Global_Mobility_Report_3_ <- read_csv("P:/COVID-19/R0 Malaysia/data/mobility/Global_Mobility_Report_210427.csv", 
                                       col_types = cols(census_fips_code = col_character(), 
                                                        date = col_character(), grocery_and_pharmacy_percent_change_from_baseline = col_number(), 
                                                        iso_3166_2_code = col_character(), 
