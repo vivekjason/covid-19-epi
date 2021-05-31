@@ -176,9 +176,9 @@ ts_mas$ventilator <- core_set$support[21:nrow(core_set)]
 
 ##define key paremeters of amalysian population
 mas_pop <- 32730000
-mas_bed <- 3825+12235 +4394 +1000 + 4002 #last updated on 25 December 2020
-mas_icu <- 871
-mas_ven <- 1581
+mas_bed <- 27183+10190 #last updated on 29 May 2021 
+mas_icu <- 1698# total for covid is 1113  but we use the max
+mas_ven <- 2138#all ventilators
 
 #get total cases, deaths and discharges
 ts_mas$cumsum <- cumsum(ts_mas$new)
@@ -223,7 +223,7 @@ ts_mas_short$lower[ts_mas_short$lower<0] <- 0.01
 #https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
 
 #load data
-Global_Mobility_Report_3_ <- read_csv("P:/COVID-19/R0 Malaysia/data/mobility/Global_Mobility_Report_210530.csv", 
+Global_Mobility_Report_3_ <- read_csv("P:/COVID-19/R0 Malaysia/data/mobility/Global_Mobility_Report_210531.csv", 
                                       col_types = cols(census_fips_code = col_character(), 
                                                        date = col_character(), grocery_and_pharmacy_percent_change_from_baseline = col_number(), 
                                                        iso_3166_2_code = col_character(), 
@@ -1380,7 +1380,7 @@ state_full <- rbind(perlis, kedah, penang, perak,selangor,
 mas_state <- full_join(ts_mas, state_full, by=c("state","date","incidence","incidence14_rate","bed_perc5"))
 
 mas_state <- mas_state%>% filter(date>as.Date("2020-03-19"))
-
+# write.csv(mas_state, "mas.csv")
 ```
 
 
@@ -2737,7 +2737,6 @@ Row {data-height=650}
 #names(ts_mas)[names(ts_mas)=="General bed utilisation (%)"] <- "bed_perc5"
 #names(ts_mas)[names(ts_mas)=="ICU bed utilisation (%)"] <- "icu_perc"
 #names(ts_mas)[names(ts_mas)=="Ventilator utilisation (%)"] <- "ven_perc"
-
 #change the name first
 names(ts_mas)[names(ts_mas)=="bed_perc5"] <- paste("General bed utilisation (%)","(n=",mas_bed,")")
 names(ts_mas)[names(ts_mas)=="icu_perc"] <- paste("ICU bed utilisation (%)","(n=",mas_icu,")")
@@ -2745,21 +2744,21 @@ names(ts_mas)[names(ts_mas)=="ven_perc"] <- paste("Ventilator utilisation (%)","
 
 #plot the incidence curve
 mas_cap_curve <- ggplot(data=ts_mas,aes(x=date)) +
-  geom_line(aes(y=`General bed utilisation (%) (n= 25456 )`,col="General bed utilisation (%) (n= 25456 )"),
+  geom_line(aes(y=`General bed utilisation (%) (n= 37373 )`,col="General bed utilisation (%) (n= 37373 )"),
             stat="identity",size=0.6, show.legend = T) + 
-  geom_line(aes(y=`ICU bed utilisation (%) (n= 871 )`,col="ICU bed utilisation (%) (n= 871 )"),
+  geom_line(aes(y=`ICU bed utilisation (%) (n= 1698 )`,col="ICU bed utilisation (%) (n= 1698 )"),
             stat="identity",size=0.6,show.legend = T) +
-  geom_line(aes(y=`Ventilator utilisation (%) (n= 1581 )`, col="Ventilator utilisation (%) (n= 1581 )"),
+  geom_line(aes(y=`Ventilator utilisation (%) (n= 2138 )`, col="Ventilator utilisation (%) (n= 2138 )"),
             stat="identity",size=0.6,alpha=0.6, show.legend = T) +
-  scale_colour_manual(name = "",labels = c("General bed utilisation (%) (n= 25456 )"="General bed utilisation (%)\n 
+  scale_colour_manual(name = "",labels = c("General bed utilisation (%) (n= 37373 )"="General bed utilisation (%)\n 
                                            (n= 25456 )", 
-                                           "ICU bed utilisation (%) (n= 871 )"="ICU bed utilisation (%)\n
+                                           "ICU bed utilisation (%) (n= 1698 )"="ICU bed utilisation (%)\n
                                            (n= 871 )", 
-                                           "Ventilator utilisation (%) (n= 1581 )"="Ventilator utilisation (%)\n
+                                           "Ventilator utilisation (%) (n= 2138 )"="Ventilator utilisation (%)\n
                                            (n= 1581 )"),
-                      values = c("General bed utilisation (%) (n= 25456 )"="#003f5c", 
-                                 "ICU bed utilisation (%) (n= 871 )"="#C14953", 
-                                 "Ventilator utilisation (%) (n= 1581 )"="#ffa600")) +
+                      values = c("General bed utilisation (%) (n= 37373 )"="#003f5c", 
+                                 "ICU bed utilisation (%) (n= 1698 )"="#C14953", 
+                                 "Ventilator utilisation (%) (n= 2138 )"="#ffa600")) +
   geom_hline(aes(yintercept=100),colour="firebrick2", linetype="dashed",size=0.3, alpha=0.5) +
   theme_minimal() +
   theme(legend.position = c(.95, .5),
@@ -2777,7 +2776,7 @@ mas_cap_curve <- ggplot(data=ts_mas,aes(x=date)) +
         axis.title.x = element_text(size=10),
         axis.title.y=element_text(size=10),
         axis.title = element_text(size=10)) +
-  ylim(0,300) +
+  ylim(0,max(ts_mas$`General bed utilisation (%) (n= 37373 )`)*1.25) +
   scale_x_date(date_breaks = "4 week", date_minor_breaks = "1 day",
                date_labels = "%e %b", limits =c(as.Date(Sys.Date()-91),as.Date(Sys.Date()+1))) +
   labs(x = "Date", y="Utilisation (%)")
@@ -2847,7 +2846,7 @@ perlis_bed_curve <- plot_ly(perlis, x = ~date, y = ~bed_perc9, type = 'scatter',
                       tickcolor = 'rgb(127,127,127)',
                       ticks = 'outside',
                       zeroline = FALSE,
-                      range = c(0,250))) %>%
+                      range = c(0,max(perlis$bed_perc9)*1.25))) %>%
   layout(title = list(text = paste0("Estimated bed-occupancy rate",
                                     '<br>',
                                     '<i>',
@@ -2912,7 +2911,7 @@ kedah_bed_curve <- plot_ly(kedah, x = ~date, y = ~bed_perc9, type = 'scatter', m
                       tickcolor = 'rgb(127,127,127)',
                       ticks = 'outside',
                       zeroline = FALSE,
-                      range = c(0,250))) %>%
+                      range = c(0,max(kedah$bed_perc9)*1.25))) %>%
   layout(title = list(text = paste0("Estimated bed-occupancy rate",
                                     '<br>',
                                     '<i>',
@@ -2977,7 +2976,7 @@ penang_bed_curve <- plot_ly(penang, x = ~date, y = ~bed_perc9, type = 'scatter',
                       tickcolor = 'rgb(127,127,127)',
                       ticks = 'outside',
                       zeroline = FALSE,
-                      range = c(0,250))) %>%
+                      range = c(0,max(penang$bed_perc9)*1.25))) %>%
   layout(title = list(text = paste0("Estimated bed-occupancy rate",
                                     '<br>',
                                     '<i>',
@@ -3042,7 +3041,7 @@ perak_bed_curve <- plot_ly(perak, x = ~date, y = ~bed_perc9, type = 'scatter', m
                       tickcolor = 'rgb(127,127,127)',
                       ticks = 'outside',
                       zeroline = FALSE,
-                      range = c(0,250))) %>%
+                      range = c(0,max(perak$bed_perc9)*1.25))) %>%
   layout(title = list(text = paste0("Estimated bed-occupancy rate",
                                     '<br>',
                                     '<i>',
@@ -3107,7 +3106,7 @@ selangor_bed_curve <- plot_ly(selangor, x = ~date, y = ~bed_perc9, type = 'scatt
                       tickcolor = 'rgb(127,127,127)',
                       ticks = 'outside',
                       zeroline = FALSE,
-                      range = c(0,250))) %>%
+                      range = c(0,max(selangor$bed_perc9)*1.25))) %>%
   layout(title = list(text = paste0("Estimated bed-occupancy rate",
                                     '<br>',
                                     '<i>',
@@ -3171,7 +3170,7 @@ kl_bed_curve <- plot_ly(kl, x = ~date, y = ~bed_perc9, type = 'scatter', mode = 
                       tickcolor = 'rgb(127,127,127)',
                       ticks = 'outside',
                       zeroline = FALSE,
-                      range = c(0,250))) %>%
+                      range = c(0,max(kl$bed_perc9)*1.25))) %>%
   layout(title = list(text = paste0("Estimated bed-occupancy rate",
                                     '<br>',
                                     '<i>',
@@ -3236,7 +3235,7 @@ putrajaya_bed_curve <- plot_ly(putrajaya,x = ~date, y = ~bed_perc9, type = 'scat
                       tickcolor = 'rgb(127,127,127)',
                       ticks = 'outside',
                       zeroline = FALSE,
-                      range = c(0,250))) %>%
+                      range = c(0,max(putrajaya$bed_perc9)*1.25))) %>%
   layout(title = list(text = paste0("Estimated bed-occupancy rate",
                                     '<br>',
                                     '<i>',
@@ -3300,7 +3299,7 @@ negeri_bed_curve <- plot_ly(negeri, x = ~date, y = ~bed_perc9, type = 'scatter',
                       tickcolor = 'rgb(127,127,127)',
                       ticks = 'outside',
                       zeroline = FALSE,
-                      range = c(0,250))) %>%
+                      range = c(0,max(negeri$bed_perc9)*1.25))) %>%
   layout(title = list(text = paste0("Estimated bed-occupancy rate",
                                     '<br>',
                                     '<i>',
@@ -3364,7 +3363,7 @@ melaka_bed_curve <- plot_ly(melaka, x = ~date, y = ~bed_perc9, type = 'scatter',
                       tickcolor = 'rgb(127,127,127)',
                       ticks = 'outside',
                       zeroline = FALSE,
-                      range = c(0,250))) %>%
+                      range = c(0,max(melaka$bed_perc9)*1.25))) %>%
   layout(title = list(text = paste0("Estimated bed-occupancy rate",
                                     '<br>',
                                     '<i>',
@@ -3428,7 +3427,7 @@ johor_bed_curve <- plot_ly(johor, x = ~date, y = ~bed_perc9, type = 'scatter', m
                       tickcolor = 'rgb(127,127,127)',
                       ticks = 'outside',
                       zeroline = FALSE,
-                      range = c(0,250))) %>%
+                      range = c(0,max(johor$bed_perc9)*1.25))) %>%
   layout(title = list(text = paste0("Estimated bed-occupancy rate",
                                     '<br>',
                                     '<i>',
@@ -3492,7 +3491,7 @@ pahang_bed_curve <- plot_ly(pahang, x = ~date, y = ~bed_perc9, type = 'scatter',
                       tickcolor = 'rgb(127,127,127)',
                       ticks = 'outside',
                       zeroline = FALSE,
-                      range = c(0,250))) %>%
+                      range = c(0,max(pahang$bed_perc9)*1.25))) %>%
   layout(title = list(text = paste0("Estimated bed-occupancy rate",
                                     '<br>',
                                     '<i>',
@@ -3556,7 +3555,7 @@ terengganu_bed_curve <- plot_ly(pahang,x = ~date, y = ~bed_perc9, type = 'scatte
                       tickcolor = 'rgb(127,127,127)',
                       ticks = 'outside',
                       zeroline = FALSE,
-                      range = c(0,250))) %>%
+                      range = c(0,max(terengganu$bed_perc9)*1.25))) %>%
   layout(title = list(text = paste0("Estimated bed-occupancy rate",
                                     '<br>',
                                     '<i>',
@@ -3620,7 +3619,7 @@ kelantan_bed_curve <- plot_ly(kelantan, x = ~date, y = ~bed_perc9, type = 'scatt
                       tickcolor = 'rgb(127,127,127)',
                       ticks = 'outside',
                       zeroline = FALSE,
-                      range = c(0,250))) %>%
+                      range = c(0,max(kelantan$bed_perc9)*1.25))) %>%
   layout(title = list(text = paste0("Estimated bed-occupancy rate",
                                     '<br>',
                                     '<i>',
@@ -3684,7 +3683,7 @@ sarawak_bed_curve <- plot_ly(sarawak, x = ~date, y = ~bed_perc9, type = 'scatter
                       tickcolor = 'rgb(127,127,127)',
                       ticks = 'outside',
                       zeroline = FALSE,
-                      range = c(0,250))) %>%
+                      range = c(0,max(sarawak$bed_perc9)*1.25))) %>%
   layout(title = list(text = paste0("Estimated bed-occupancy rate",
                                     '<br>',
                                     '<i>',
@@ -3748,7 +3747,7 @@ sabah_bed_curve <- plot_ly(sabah, x = ~date, y = ~bed_perc9, type = 'scatter', m
                       tickcolor = 'rgb(127,127,127)',
                       ticks = 'outside',
                       zeroline = FALSE,
-                      range = c(0,250))) %>%
+                      range = c(0,max(sabah$bed_perc9)*1.25))) %>%
   layout(title = list(text = paste0("Estimated bed-occupancy rate",
                                     '<br>',
                                     '<i>',
@@ -3811,7 +3810,7 @@ labuan_bed_curve <- plot_ly(labuan, x = ~date, y = ~bed_perc9, type = 'scatter',
                       tickcolor = 'rgb(127,127,127)',
                       ticks = 'outside',
                       zeroline = FALSE,
-                      range = c(0,250))) %>%
+                      range = c(0,max(labuan$bed_perc9)*1.25))) %>%
   layout(title = list(text = paste0("Estimated bed-occupancy rate",
                                     '<br>',
                                     '<i>',
