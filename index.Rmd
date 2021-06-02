@@ -223,7 +223,7 @@ ts_mas_short$lower[ts_mas_short$lower<0] <- 0.01
 #https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
 
 #load data
-Global_Mobility_Report_3_ <- read_csv("P:/COVID-19/R0 Malaysia/data/mobility/Global_Mobility_Report_210601.csv", 
+Global_Mobility_Report_3_ <- read_csv("P:/COVID-19/R0 Malaysia/data/mobility/Global_Mobility_Report_210602.csv", 
                                       col_types = cols(census_fips_code = col_character(), 
                                                        date = col_character(), grocery_and_pharmacy_percent_change_from_baseline = col_number(), 
                                                        iso_3166_2_code = col_character(), 
@@ -1236,11 +1236,13 @@ labuan$average <- (labuan$recreation+labuan$grocery+labuan$parks)/3
 #lets then include the state data for health systems and calculate the incidence
 #load the state data
 state_data_v2 <- read_excel("P:/COVID-19/R0 Malaysia/data/population_healthcapacity/state_data_v3.xlsx", 
-    col_types = c("text", "numeric", "numeric", 
+    col_types = c("text","text", "date", "numeric", 
         "numeric", "numeric", "numeric", 
         "numeric", "numeric", "numeric", 
         "numeric", "numeric", "numeric", 
-        "numeric","numeric"))
+        "numeric","numeric","numeric",
+        "numeric", "numeric"))
+state_data_v2 <- state_data_v2 %>% filter (status=="use")
 
 #calculate the cumulative number of cases
 perlis$cumsum <- cumsum(perlis$case)
@@ -1297,22 +1299,22 @@ sarawak$incidence14_rate <- round((sarawak$incident14 /state_data_v2$population_
 labuan$incidence14_rate <- round((labuan$incident14 /state_data_v2$population_new[state_data_v2$state=="W.P. Labuan"])*100000,2)
 
 #add in a column for hospitals and icu beds
-perlis$hbed <- state_data_v2$total_gov_beds[state_data_v2$state=="Perlis"]
-kedah$hbed <- state_data_v2$total_gov_beds[state_data_v2$state=="Kedah"]
-penang$hbed <- state_data_v2$total_gov_beds[state_data_v2$state=="Pulau Pinang"]
-perak$hbed <- state_data_v2$total_gov_beds[state_data_v2$state=="Perak"]
-selangor$hbed <- state_data_v2$total_gov_beds[state_data_v2$state=="Selangor_28122020"]
-kl$hbed <- state_data_v2$total_gov_beds[state_data_v2$state=="W.P. Kuala Lumpur__28122020"]
-putrajaya$hbed <- state_data_v2$total_gov_beds[state_data_v2$state=="W.P. Putrajaya"]
-melaka$hbed <- state_data_v2$total_gov_beds[state_data_v2$state=="Melaka"]
-negeri$hbed <- state_data_v2$total_gov_beds[state_data_v2$state=="Negeri Sembilan"]
-johor$hbed <- state_data_v2$total_gov_beds[state_data_v2$state=="Johor"]
-pahang$hbed <- state_data_v2$total_gov_beds[state_data_v2$state=="Pahang"]
-kelantan$hbed <- state_data_v2$total_gov_beds[state_data_v2$state=="Kelantan"]
-terengganu$hbed <- state_data_v2$total_gov_beds[state_data_v2$state=="Terengganu"]
-sabah$hbed <- state_data_v2$total_gov_beds[state_data_v2$state=="Sabah_09012021"]
-sarawak$hbed <- state_data_v2$total_gov_beds[state_data_v2$state=="Sarawak"]
-labuan$hbed <- state_data_v2$total_gov_beds[state_data_v2$state=="W.P. Labuan_29102020"]
+perlis$hbed <- state_data_v2$estimated_covid19_beds[state_data_v2$state=="Perlis"]
+kedah$hbed <- state_data_v2$estimated_covid19_beds[state_data_v2$state=="Kedah"]
+penang$hbed <- state_data_v2$estimated_covid19_beds[state_data_v2$state=="Pulau Pinang"]
+perak$hbed <- state_data_v2$estimated_covid19_beds[state_data_v2$state=="Perak"]
+selangor$hbed <- state_data_v2$estimated_covid19_beds[state_data_v2$state=="Selangor"]
+kl$hbed <- state_data_v2$estimated_covid19_beds[state_data_v2$state=="W.P. Kuala Lumpur"]
+putrajaya$hbed <- state_data_v2$estimated_covid19_beds[state_data_v2$state=="W.P. Putrajaya"]
+melaka$hbed <- state_data_v2$estimated_covid19_beds[state_data_v2$state=="Melaka"]
+negeri$hbed <- state_data_v2$estimated_covid19_beds[state_data_v2$state=="Negeri Sembilan"]
+johor$hbed <- state_data_v2$estimated_covid19_beds[state_data_v2$state=="Johor"]
+pahang$hbed <- state_data_v2$estimated_covid19_beds[state_data_v2$state=="Pahang"]
+kelantan$hbed <- state_data_v2$estimated_covid19_beds[state_data_v2$state=="Kelantan"]
+terengganu$hbed <- state_data_v2$estimated_covid19_beds[state_data_v2$state=="Terengganu"]
+sabah$hbed <- state_data_v2$estimated_covid19_beds[state_data_v2$state=="Sabah"]
+sarawak$hbed <- state_data_v2$estimated_covid19_beds[state_data_v2$state=="Sarawak"]
+labuan$hbed <- state_data_v2$estimated_covid19_beds[state_data_v2$state=="W.P. Labuan"]
 
 #add in a column for percentage of beds left
 perlis$bed_perc3 <- (perlis$active_cases3/(perlis$hbed*0.2))*100
@@ -2649,7 +2651,7 @@ mas_inc_curve <- plot_ly() %>%
            sizey = 0.2,
            opacity = 1.1
       )))  %>%
-  layout(yaxis = list(type = "log", range=c(0.5,3.5),
+  layout(yaxis = list(type = "log", range=c(0.5,3.55),
                       tickvals = as.list(c(10,100,1000)))) %>% 
   layout(titlefont=list(size=12)) %>%
   config(modeBarButtonsToRemove = c("zoomIn2d", "zoomOut2d", "autoScale2d", "resetScale2d", "hoverClosestCartesian", "hoverCompareCartesian","lasso2d", "select2d", "pan2d","zoom2d")) %>%
