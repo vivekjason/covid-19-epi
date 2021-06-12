@@ -1382,7 +1382,7 @@ state_full <- rbind(perlis, kedah, penang, perak,selangor,
 mas_state <- full_join(ts_mas, state_full, by=c("state","date","incidence","incidence14_rate","bed_perc5"))
 
 mas_state <- mas_state%>% filter(date>as.Date("2020-03-19"))
-# write.csv(mas_state, "mas.csv")
+write.csv(mas_state, "mas.csv")
 ```
 
 
@@ -1521,7 +1521,7 @@ Row{data-height=150}
 ### Total cases
 
 ```{r}
-total_cases <- sum(core_set$new_cases)
+total_cases <- core_set$total_cases[nrow(core_set)]
 valueBox(value=total_cases,
          caption="Total cases reported",
          color=confirmed_color,
@@ -1540,7 +1540,7 @@ valueBox(value=new_case,
 ### Total deaths
 
 ```{r}
-total_deaths <- sum(core_set$new_deaths)
+total_deaths <- core_set$total_deaths[nrow(core_set)]
 valueBox(value=total_deaths,
          caption="Total deaths reported",
          color=death_color,
@@ -1559,7 +1559,7 @@ valueBox(value=new_deaths,
 ### Total discharged
 
 ```{r}
-total_deaths <- sum(core_set$recover)
+total_deaths <- core_set$total_recover[nrow(core_set)]
 valueBox(value=total_deaths,
          caption="Total discharged",
          color=discharge_color,
