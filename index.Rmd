@@ -9,7 +9,7 @@ output:
     includes:
        in_header: GA_Script.html
 ---
-
+rm(list=ls())
 
 ```{r setup, include=FALSE}
 library(flexdashboard)
@@ -31,6 +31,13 @@ library(heatmaply)
 library(RcppRoll)
 library(gplots)
 library(MMWRweek)
+library(leaflet)
+library(raster)
+library(RColorBrewer)
+library(mapview)
+library(kableExtra)
+library(maptools)
+library(rgdal)
 ```
 
 
@@ -1408,7 +1415,7 @@ state$region[state$state=="W.P. Kuala Lumpur"] <- "Central region"
 state$region[state$state=="W.P. Putrajaya"] <- 'Central region'
 
 #group by regions and sum up new region cases
-region <- state %>% select(date,region,new_cases,total_cases) %>% group_by(date,region) %>% summarise(new=sum(new_cases), total=sum(total_cases))
+region <- state %>% dplyr::select(date,region,new_cases,total_cases) %>% group_by(date,region) %>% summarise(new=sum(new_cases), total=sum(total_cases))
 colnames(region) <- c("date","location","new_cases", "total_cases")
 
 #add populations for all states
@@ -5788,6 +5795,438 @@ labuan_mob_curve %>% layout(
          margin=m)
 ```
 
+Testing {data-orientation=columns}
+=====================================  
+
+Column {data-width=500}
+-------------------------------------
+### National Test Positivity Ratio
+```{r}
+#load data
+test <- read_excel("P:/COVID-19/R0 Malaysia/data/testing/testing_v3.xlsx", 
+    col_types = c("date", "numeric", "numeric"))
+
+#add the new_cases, positivity rate and testing rate
+test_mas <-  core_set %>% dplyr::select(date, new_cases) %>% 
+  left_join(test, by="date") %>%
+  mutate(test_ma7 = rollmean(new_tests, k = 7, fill = "extend"),
+         cases_ma7= rollmean(new_cases, k = 7, fill = "extend"),
+         positivity_rate= (new_cases/new_tests)*100,
+         positivity_rate_ma=(cases_ma7/test_ma7)*100,
+         testing_rate=(test_ma7/mas_pop)*1000)
+
+#create margins
+m <- list(
+    l = 20,
+    r = 60,
+    b = 20,
+    t = 20,
+    pad = 5
+  )
+
+#define an annotation
+a <- list(
+  x = as.numeric(as.POSIXct(Sys.Date()-75, format="%Y-%m-%d"))*1000,
+  y = (((max(test_mas$cases)*1.15)*5)/15)+250,
+  font = list(size = 8),
+  text = "WHO recommended test positivity ratio threshold of 5%",
+  showarrow = F
+)
+
+#filter outdates
+test_mas <- test_mas %>% filter(date>Sys.Date()-91)
+
+#plot for malaysia
+mas_test_curve <- plot_ly() %>%
+  add_bars(data = test_mas, x = ~date, y = ~new_cases, name = "New cases", marker=list(color="grey")) %>%
+    add_lines(data = test_mas, x = ~date, y = ~positivity_rate_ma, name = "Positivity ratio (7-day Moving Average)", line=list(width = 4, color = 'rgb(254,1,154)'),
+            yaxis = 'y2') %>%
+  add_lines(data = test_mas, x = ~date, y = ~positivity_rate, name = "Positivity ratio", line=list(width = 4, color ='rgb(207,255,4)'),
+            yaxis = 'y2') %>%
+  layout(titlefont=list(size=12),
+         xaxis = list(title="Date",
+                      range = 
+            c(as.numeric(as.POSIXct(Sys.Date()-91, format="%Y-%m-%d"))*1000,
+              as.numeric(as.POSIXct(Sys.Date(), format="%Y-%m-%d"))*1000)),
+         yaxis = list(tickfont= list(color = 'grey9', size=8), color='grey9', range=c(0,max(test_mas$cases)*1.15),
+                      title="Daily new cases (count)"),
+         yaxis2 = list(overlaying = "y", side = "right",
+                       tickfont = list(color = 'grey9', size=8), color='grey9', range=c(0,15),
+                       title = paste0("Test Positivity",
+                                    '<br>', "rate (%)"),
+         legend = list(x = 1.05, y = 0.9))) %>%
+  add_segments(x = as.numeric(as.POSIXct(Sys.Date()-91, format="%Y-%m-%d"))*1000,
+               xend = as.numeric(as.POSIXct(Sys.Date(), format="%Y-%m-%d"))*1000, 
+               y = ((max(test_mas$cases)*1.15)*5)/15, yend = ((max(test_mas$cases)*1.15)*5)/15,
+               type = "line",
+  line = list(color = "grey",
+              dash="dot"), showlegend = FALSE) 
+  
+mas_test_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= 0.8,
+           y= 1,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      ))) %>% 
+  layout(xaxis = list(autorange = TRUE)) %>%
+  layout(title = list(text = paste0("Test Positivity ratio",
+                                    '<br>',
+                                    '<i>',
+                                    "Malaysia",
+                                    '</i>'))) %>%
+  config(modeBarButtonsToRemove = c("zoomIn2d", "zoomOut2d", "autoScale2d", "resetScale2d", "hoverClosestCartesian", "hoverCompareCartesian","lasso2d", "select2d", "pan2d","zoom2d")) %>%
+  layout(xaxis=list(fixedrange=TRUE)) %>% layout(yaxis=list(fixedrange=TRUE), yaxis2=list(fixedrange=TRUE)) %>%
+  config(displaylogo = FALSE) %>% 
+  layout(legend = list(x = 0.05, y = 1.00)) %>% 
+  layout(legend = l,
+         margin=m, 
+         annotations=a)
+
+```
+
+### National Testing Rate
+```{r}
+#load data
+test <- read_excel("P:/COVID-19/R0 Malaysia/data/testing/testing_v3.xlsx", 
+    col_types = c("date", "numeric", "numeric"))
+
+#add the new_cases, positivity rate and testing rate
+test_mas <-  core_set %>% dplyr::select(date, new_cases) %>% 
+  left_join(test, by="date") %>%
+  mutate(test_ma7 = rollmean(new_tests, k = 7, fill = "extend"),
+         cases_ma7= rollmean(new_cases, k = 7, fill = "extend"),
+         positivity_rate= (new_cases/new_tests)*100,
+         positivity_rate_ma=(cases_ma7/test_ma7)*100,
+         testing_rate=(new_tests/mas_pop)*1000,
+         testing_rate_ma=(test_ma7/mas_pop)*1000,)
+
+#create margins
+m <- list(
+    l = 20,
+    r = 60,
+    b = 20,
+    t = 20,
+    pad = 5
+  )
+
+#filter outdates
+test_mas <- test_mas %>% filter(date>Sys.Date()-91)
+
+#plot for malaysia
+mas_test_curve <- plot_ly() %>%
+  add_bars(data = test_mas, x = ~date, y = ~new_cases, name = "New cases", marker=list(color="grey")) %>%
+    add_lines(data = test_mas, x = ~date, y = ~testing_rate_ma, name = "Testing rate (7-day moving average)", line=list(width = 4, color = 'rgb(254,1,154)'),
+            yaxis = 'y2') %>%
+  add_lines(data = test_mas, x = ~date, y = ~testing_rate, name = "Testing rate", line=list(width = 4, color ='rgb(207,255,4)'),
+            yaxis = 'y2') %>%
+  layout(titlefont=list(size=12),
+         xaxis = list(title="Date",
+                      range = 
+            c(as.numeric(as.POSIXct(Sys.Date()-91, format="%Y-%m-%d"))*1000,
+              as.numeric(as.POSIXct(Sys.Date(), format="%Y-%m-%d"))*1000)),
+         yaxis = list(tickfont= list(color = 'grey9', size=8), color='grey9', range=c(0,max(test_mas$new_cases)*1.15),
+                      title="Daily new cases (count)"),
+         yaxis2 = list(overlaying = "y", side = "right",
+                       tickfont = list(color = 'grey9', size=8), color='grey9', range=c(0,5),
+                       title = paste0("Testing rate",
+                                    '<br>', "(per 1000 population)"),
+         legend = list(x = 1.05, y = 0.9)))
+mas_test_curve %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= 0.8,
+           y= 1,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      ))) %>%
+  layout(xaxis = list(autorange = TRUE)) %>%
+  layout(title = list(text = paste0("Testing Rate",
+                                    '<br>',
+                                    '<i>',
+                                    "Malaysia",
+                                    '</i>'))) %>%
+  config(modeBarButtonsToRemove = c("zoomIn2d", "zoomOut2d", "autoScale2d", "resetScale2d", "hoverClosestCartesian", "hoverCompareCartesian","lasso2d", "select2d", "pan2d","zoom2d")) %>%
+  layout(xaxis=list(fixedrange=TRUE)) %>% layout(yaxis=list(fixedrange=TRUE), yaxis2=list(fixedrange=TRUE)) %>%
+  config(displaylogo = FALSE) %>% 
+  layout(legend = list(x = 0.05, y = 1.00)) %>% 
+  layout(legend = l,
+         margin=m)
+
+```
+
+
+
+Row {.tabset}
+-------------------------------------
+### Test positivity ratio by State
+```{r}
+#load packages
+testing_state <- read_csv("P:/COVID-19/R0 Malaysia/data/testing/ippc/testing_state.csv")
+
+l <- list(
+  bgcolor = "transparent",
+  bordercolor = "transparent",
+  font=list(size=12))
+
+#get cases into weeks
+mas_weeks <- state %>% dplyr::select(date, state, new_cases) 
+
+#get epid week
+mas_weeks$epid_week <- MMWRweek(mas_weeks$date)$MMWRweek
+
+#get state pop 
+state_pop <- state_data_v2 %>% dplyr::select(state, population_new) 
+
+#filter out the weeks and aggregate
+mas_week <- mas_weeks %>% filter(date >as.Date("2020-12-31")) %>%
+  filter(epid_week>20 & epid_week <25) %>%
+  dplyr::select(epid_week, state, new_cases) %>%
+  dplyr::group_by(epid_week, state) %>%
+  mutate(cases=sum(new_cases)) %>%
+  dplyr::select(epid_week, state, cases) %>%
+  unique() %>% 
+  left_join (testing_state, by=c("epid_week", "state")) %>%
+  left_join(state_pop, by="state") %>%
+  mutate(test_rate=(total_screened/population_new)*1000)
+
+#create margins
+m <- list(
+    l = 20,
+    r = 60,
+    b = 20,
+    t = 50,
+    pad = 15
+  )
+
+#layput test positivity by state
+state_test_curve <- ggplot(data=mas_week, aes(x=epid_week)) + 
+  geom_bar(aes(y=cases, colour="Daily cases"),stat="identity", fill="grey") +
+  geom_line(aes(y=positive_ratio*1000, col="Test positivity ratio"),alpha=0.7, size=1.05) +
+  scale_y_continuous(sec.axis = sec_axis(~./1000, name = "Test positivity ratio (%)"))+
+  scale_color_manual(name=" ",
+                     values=c("Daily cases"="grey", "Test positivity ratio"="deeppink2"
+                              )) +
+  facet_wrap(~state) +
+  labs(x="Epidemiologic week", y="Daily cases",
+       title = "Test positivity ratio by states in Malaysia") +
+  theme_minimal() +
+  theme(axis.text = element_text(size=8),
+        axis.title = element_text(size=8),
+        strip.text = element_text(size=8),
+        plot.title = element_text(size=12),
+        legend.text = element_text(size=10),
+        legend.title=element_text(size=10)) +
+  xlim(c(min(mas_week$epid_week)-1, max(mas_week$epid_week)+3)) +
+  geom_hline(yintercept=5000, linetype="dashed", col="grey79", size=1.1) +
+  geom_hline(yintercept=10000, linetype="dashed", col="grey79", size=1.1) +
+  geom_text(aes(x =max(mas_week$epid_week)+2, y = 5700, 
+                label = "TPR: 5%", fontface="plain"),size=2, col="grey49") +
+  geom_text(aes(x =max(mas_week$epid_week)+2, y = 10700,
+                label = "TPR: 10%", fontface="plain"),size=2, col="grey49")
+state_test_curve
+
+ggplotly(state_test_curve) %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= 0.7,
+           y= 1.03,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      ))) %>%
+  layout(title = list(text = paste0("Test positivity ratio",
+                                    '<br>',
+                                    '<i>',
+                                    "States in Malaysia",
+                                    '</i>')),
+         titlefont=list(size=12))  %>%
+  layout(xaxis = list(autorange = TRUE)) %>%
+  config(modeBarButtonsToRemove = c("zoomIn2d", "zoomOut2d", "autoScale2d", "resetScale2d", "hoverClosestCartesian", "hoverCompareCartesian","lasso2d", "select2d", "pan2d","zoom2d")) %>%
+  layout(xaxis=list(fixedrange=TRUE)) %>% layout(yaxis=list(fixedrange=TRUE), yaxis2=list(fixedrange=TRUE)) %>%
+  config(displaylogo = FALSE) %>%
+  layout(legend = list(x = 0.05, y = 1.00)) %>%
+  layout(legend = l,
+         margin=m)
+
+```
+
+### Testing rate by State
+```{r}
+#layput test positivity by state
+state_test_rate_curve <- ggplot(data=mas_week, aes(x=epid_week)) + 
+  geom_bar(aes(y=cases, colour="Daily cases"),stat="identity", fill="grey") +
+  geom_line(aes(y=test_rate*100, col="Testing rate"),alpha=0.7, size=1.05) +
+  scale_y_continuous(sec.axis = sec_axis(~./100, name = "Testing rate /n(per 1000 population"))+
+  scale_color_manual(name=" ",
+                     values=c("Daily cases"="grey", "Testing rate"="deeppink2"
+                              )) +
+  facet_wrap(~state) +
+  labs(x="Epidemiologic week", y="Daily cases",
+       title = "Testing rate by states in Malaysia") +
+  theme_minimal() +
+  theme(axis.text = element_text(size=8),
+        axis.title = element_text(size=8),
+        strip.text = element_text(size=8),
+        plot.title = element_text(size=12),
+        legend.text = element_text(size=10),
+        legend.title=element_text(size=10)) +
+  xlim(c(min(mas_week$epid_week)-1, max(mas_week$epid_week)+3.5)) +
+  geom_hline(yintercept=5000, linetype="dashed", col="grey79", size=1.1) +
+  geom_hline(yintercept=10000, linetype="dashed", col="grey79", size=1.1) +
+  geom_hline(yintercept=1000, linetype="dashed", col="grey79", size=1.1) +
+  geom_text(aes(x =max(mas_week$epid_week)+2, y = 5700, 
+                label = "TR: 50 per 1k population", fontface="plain"), size=2, col="grey49") +
+  geom_text(aes(x =max(mas_week$epid_week)+2, y = 10700, 
+                label = "TR: 100 per 1k population", fontface="plain"), size=2, col="grey49") +
+  geom_text(aes(x =max(mas_week$epid_week)+2, y = 1700, 
+                label = "TR: 10 per 1k population", fontface="plain"), size=2, col="grey49")
+state_test_rate_curve
+ggplotly(state_test_rate_curve) %>% layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= 0.7,
+           y= 1.03,
+           sizex = 0.15,
+           sizey = 0.15,
+           opacity = 1.1
+      ))) %>%
+  layout(title = list(text = paste0("Testing rate",
+                                    '<br>',
+                                    '<i>',
+                                    "States in Malaysia",
+                                    '</i>')),
+         titlefont=list(size=12))  %>%
+  layout(xaxis = list(autorange = TRUE)) %>%
+  config(modeBarButtonsToRemove = c("zoomIn2d", "zoomOut2d", "autoScale2d", "resetScale2d", "hoverClosestCartesian", "hoverCompareCartesian","lasso2d", "select2d", "pan2d","zoom2d")) %>%
+  layout(xaxis=list(fixedrange=TRUE)) %>% layout(yaxis=list(fixedrange=TRUE), yaxis2=list(fixedrange=TRUE)) %>%
+  config(displaylogo = FALSE) %>%
+  layout(legend = list(x = 0.05, y = 1.00)) %>%
+  layout(legend = l,
+         margin=m)
+
+```
+
+### Test positivity map
+```{r}
+# Read this shape file with the rgdal library.
+mas_spdf <- shapefile("C:/Users/sueth/Documents/data/gadm36_MYS_shp/gadm36_MYS_1.shp")
+
+#check map labels against data labels for countries
+map_labels <- mas_spdf@data[["NAME_1"]]
+mas_labels <- mas_week$state
+
+#check for similarities and differences
+# map_labels %in% mas_labels
+# intersect(map_labels,mas_labels)
+# setdiff(map_labels,mas_labels)
+# setdiff(mas_labels,map_labels)
+
+#rename certain differing states
+mas_spdf@data$NAME_1[mas_spdf@data$NAME_1=="Trengganu"] <- "Terengganu"
+mas_spdf@data$NAME_1[mas_spdf@data$NAME_1=="Kuala Lumpur"] <- "W.P. Kuala Lumpur"
+mas_spdf@data$NAME_1[mas_spdf@data$NAME_1=="Putrajaya"] <- "W.P. Putrajaya"
+mas_spdf@data$NAME_1[mas_spdf@data$NAME_1=="Labuan"] <- "W.P. Labuan"
+mas_week$NAME_1 <- mas_week$state
+
+#merge datasets
+mas_latest <- mas_week %>% filter(epid_week==max(mas_week$epid_week))
+mas_spdf <- merge(mas_spdf,mas_latest,by="NAME_1", duplicateGeoms = T)
+
+#create the maps
+# Prepare the text for tooltips:
+mytext <- paste(
+  "State: ", mas_spdf@data$NAME,"<br/>",
+  "Test positivity ratio: ", round(mas_week$positive_ratio, 2), 
+  sep="") %>%
+  lapply(htmltools::HTML)
+
+#prepare colors
+bins <- c(0,5,10,15)
+pal <- colorBin(
+  palette = c("deeppink2", "greenyellow","seagreen4"),
+  domain = mas_spdf@data$positive_ratio,
+  reverse = T,
+  bins = bins
+)
+
+# Bin
+tpr_states <- leaflet(mas_spdf)%>%
+  setView(lng=110, lat=4.5, zoom=5.4) %>%
+  addTiles()  %>% 
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addPolygons(
+    stroke=TRUE, 
+    smoothFactor = 0.2, 
+    fillOpacity = 0.9, 
+    color=~pal(positive_ratio), 
+    weight=0.3,
+    label = mytext,
+    labelOptions = labelOptions( 
+      style = list("font-weight" = "normal", padding = "3px 8px"), 
+      textsize = "13px", 
+      direction = "auto"
+    )
+  ) %>%
+  addLegend( pal=pal, values=~positive_ratio, opacity=0.9, 
+             title = "Test positivity ratio (%)", position = "bottomleft")
+tpr_states
+```
+
+
+### Testing rate map
+```{r}
+#create the maps
+# Prepare the text for tooltips:
+mytext <- paste(
+  "State: ", mas_spdf@data$NAME,"<br/>",
+  "Testing rate: ", round(mas_week$test_rate, 2), 
+  sep="") %>%
+  lapply(htmltools::HTML)
+
+#prepare colors
+bins <- c(0, 5,10 ,50, 150)
+pal <- colorBin(
+  palette = c("deeppink2","#FFF000", "greenyellow","seagreen4"),
+  domain = mas_spdf@data$test_rate,
+  reverse = F,
+  bins = bins,
+  
+)
+
+# Bin
+tr_states <- leaflet(mas_spdf)%>%
+  setView(lng=110, lat=4.5, zoom=5.4) %>%
+  addTiles()  %>% 
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addPolygons(
+    stroke=TRUE, 
+    smoothFactor = 0.2, 
+    fillOpacity = 0.9, 
+    color=~pal(test_rate), 
+    weight=0.3,
+    label = mytext,
+    labelOptions = labelOptions( 
+      style = list("font-weight" = "normal", padding = "3px 8px"), 
+      textsize = "13px", 
+      direction = "auto"
+    )
+  ) %>%
+  addLegend( pal=pal, values=~test_rate, opacity=0.9, 
+             title = "Testing rate (per 1000 population)", position = "bottomleft")
+tr_states
+```
 
 Documentation {data-orientation=rows}
 =====================================  
