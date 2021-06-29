@@ -231,7 +231,7 @@ ts_mas_short$lower[ts_mas_short$lower<0] <- 0.01
 #https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
 
 #load data
-Global_Mobility_Report_3_ <- read_csv("P:/COVID-19/R0 Malaysia/data/mobility/Global_Mobility_Report_210627.csv", 
+Global_Mobility_Report_3_ <- read_csv("P:/COVID-19/R0 Malaysia/data/mobility/Global_Mobility_Report_210628.csv", 
                                       col_types = cols(census_fips_code = col_character(), 
                                                        date = col_character(), grocery_and_pharmacy_percent_change_from_baseline = col_number(), 
                                                        iso_3166_2_code = col_character(), 
@@ -6044,12 +6044,6 @@ ggplotly(state_test_curve) %>% layout(
            sizey = 0.15,
            opacity = 1.1
       ))) %>%
-  layout(title = list(text = paste0("Test positivity ratio",
-                                    '<br>',
-                                    '<i>',
-                                    "States in Malaysia",
-                                    '</i>')),
-         titlefont=list(size=12))  %>%
   layout(xaxis = list(autorange = TRUE)) %>%
   config(modeBarButtonsToRemove = c("zoomIn2d", "zoomOut2d", "autoScale2d", "resetScale2d", "hoverClosestCartesian", "hoverCompareCartesian","lasso2d", "select2d", "pan2d","zoom2d")) %>%
   layout(xaxis=list(fixedrange=TRUE)) %>% layout(yaxis=list(fixedrange=TRUE), yaxis2=list(fixedrange=TRUE)) %>%
@@ -6102,12 +6096,6 @@ ggplotly(state_test_rate_curve) %>% layout(
            sizey = 0.15,
            opacity = 1.1
       ))) %>%
-  layout(title = list(text = paste0("Testing rate",
-                                    '<br>',
-                                    '<i>',
-                                    "States in Malaysia",
-                                    '</i>')),
-         titlefont=list(size=12))  %>%
   layout(xaxis = list(autorange = TRUE)) %>%
   config(modeBarButtonsToRemove = c("zoomIn2d", "zoomOut2d", "autoScale2d", "resetScale2d", "hoverClosestCartesian", "hoverCompareCartesian","lasso2d", "select2d", "pan2d","zoom2d")) %>%
   layout(xaxis=list(fixedrange=TRUE)) %>% layout(yaxis=list(fixedrange=TRUE), yaxis2=list(fixedrange=TRUE)) %>%
@@ -6147,7 +6135,7 @@ mas_spdf <- merge(mas_spdf,mas_latest,by="NAME_1", duplicateGeoms = T)
 #create the maps
 # Prepare the text for tooltips:
 mytext <- paste(
-  "State: ", mas_spdf@data$NAME,"<br/>",
+  "State: ", mas_spdf@data$NAME_1,"<br/>",
   "Test positivity ratio: ", round(mas_week$positive_ratio, 2), 
   sep="") %>%
   lapply(htmltools::HTML)
@@ -6190,7 +6178,7 @@ tpr_states
 #create the maps
 # Prepare the text for tooltips:
 mytext <- paste(
-  "State: ", mas_spdf@data$NAME,"<br/>",
+  "State: ", mas_spdf@data$NAME_1,"<br/>",
   "Testing rate: ", round(mas_week$test_rate, 2), 
   sep="") %>%
   lapply(htmltools::HTML)
