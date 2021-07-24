@@ -229,7 +229,7 @@ ts_mas_short$lower[ts_mas_short$lower<0] <- 0.01
 #https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
 
 #load data
-Global_Mobility_Report_3_ <- read_csv("P:/COVID-19/R0 Malaysia/data/mobility/Global_Mobility_Report_210723.csv", 
+Global_Mobility_Report_3_ <- read_csv("P:/COVID-19/R0 Malaysia/data/mobility/Global_Mobility_Report_210724.csv", 
                                       col_types = cols(census_fips_code = col_character(), 
                                                        date = col_character(), grocery_and_pharmacy_percent_change_from_baseline = col_number(), 
                                                        iso_3166_2_code = col_character(), 
@@ -1388,7 +1388,7 @@ state_full <- rbind(perlis, kedah, penang, perak,selangor,
 mas_state <- full_join(ts_mas, state_full, by=c("state","date","incidence","incidence14_rate","bed_perc5"))
 
 mas_state <- mas_state%>% filter(date>as.Date("2020-03-19"))
-#write.csv(mas_state, "mas.csv")
+write.csv(mas_state, "mas.csv")
 ```
 
 
