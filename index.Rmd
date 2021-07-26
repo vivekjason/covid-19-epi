@@ -10,6 +10,10 @@ output:
        in_header: GA_Script.html
 ---
 ```{r setup, include=FALSE}
+#delete docs folder
+unlink("P:/COVID-19/covid-19-epi/docs", recursive = T, force = T)
+
+#load packages
 library(flexdashboard)
 library(EpiEstim)
 library(R0)
@@ -229,16 +233,7 @@ ts_mas_short$lower[ts_mas_short$lower<0] <- 0.01
 #https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
 
 #load data
-Global_Mobility_Report_3_ <- read_csv("P:/COVID-19/R0 Malaysia/data/mobility/Global_Mobility_Report_210725.csv", 
-                                      col_types = cols(census_fips_code = col_character(), 
-                                                       date = col_character(), grocery_and_pharmacy_percent_change_from_baseline = col_number(), 
-                                                       iso_3166_2_code = col_character(), 
-                                                       parks_percent_change_from_baseline = col_number(), 
-                                                       residential_percent_change_from_baseline = col_number(), 
-                                                       retail_and_recreation_percent_change_from_baseline = col_number(), 
-                                                       sub_region_1 = col_character(), sub_region_2 = col_character(), 
-                                                       transit_stations_percent_change_from_baseline = col_number(), 
-                                                       workplaces_percent_change_from_baseline = col_number()))
+Global_Mobility_Report_3_ <- read_csv("https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv")
 # FIXME: update this daily 
 
 #add an avergae mobility to the ts_mas dataset
@@ -256,6 +251,21 @@ names(ts_mas)[names(ts_mas)=="parks_percent_change_from_baseline"]="parks"
 names(ts_mas)[names(ts_mas)=="transit_stations_percent_change_from_baseline"]="transit"
 names(ts_mas)[names(ts_mas)=="workplaces_percent_change_from_baseline"]="work"
 names(ts_mas)[names(ts_mas)=="residential_percent_change_from_baseline"]="residence"
+
+#index the mobility report
+write.csv(Global_Mobility_Report_3_, paste0("P:/COVID-19/R0 Malaysia/data/mobility/Global_Mobility_Report_3_",as.character(format(Sys.Date(), "%y%m%d")), ",csv"))
+
+#pull vaccination data and replace in vaccination folder
+vax_state <- read.csv("https://raw.githubusercontent.com/CITF-Malaysia/citf-public/main/vaccination/vax_state.csv")
+vax_malaysia <- read.csv("https://raw.githubusercontent.com/CITF-Malaysia/citf-public/main/vaccination/vax_malaysia.csv")
+vaxreg_malaysia <- read.csv("https://raw.githubusercontent.com/CITF-Malaysia/citf-public/main/registration/vaxreg_malaysia.csv")
+vaxreg_state <- read.csv("https://raw.githubusercontent.com/CITF-Malaysia/citf-public/main/registration/vaxreg_state.csv")
+
+#write csv to driectoryies
+write.csv(vax_state, "P:/COVID-19/R0 Malaysia/data/vaccination/vax_state.csv")
+write.csv(vax_malaysia, "P:/COVID-19/R0 Malaysia/data/vaccination/vax_malaysia.csv")
+write.csv(vaxreg_malaysia, "P:/COVID-19/R0 Malaysia/data/vaccination/vaxreg_malaysia.csv")
+write.csv(vaxreg_state, "P:/COVID-19/R0 Malaysia/data/vaccination/vaxreg_state.csv")
 
 
 ```
@@ -6213,6 +6223,13 @@ tr_states <- leaflet(mas_spdf)%>%
              title = "Testing rate (per 1000 population)", position = "bottomleft")
 tr_states
 ```
+
+```{r}
+#write to data tests and cases
+write.csv(core_set, "P:/COVID-19/covid-19-epi/data/cases.csv")
+write.csv(test, "P:/COVID-19/covid-19-epi/data/tests.csv")
+```
+
 
 Documentation {data-orientation=rows}
 =====================================  
