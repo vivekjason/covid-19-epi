@@ -11,7 +11,7 @@ output:
 ---
 ```{r setup, include=FALSE}
 #delete docs folder
-unlink("P:/COVID-19/covid-19-epi/docs", recursive = T, force = T)
+#unlink("P:/COVID-19/covid-19-epi/docs", recursive = T, force = T)
 
 #load packages
 library(flexdashboard)
@@ -197,10 +197,15 @@ ts_mas$cumsum_discharged <- cumsum(ts_mas$discharged)
 
 #create a 14-day moving incidence rate
 ts_mas$incident14 <- rollsum(ts_mas$new,k=14,fill=NA, align="right")
-
+ts_mas$mortality14 <- rollsum(ts_mas$death,k=7,fill=NA, align="right")
 #calculate the incidence 
 ts_mas$incidence<- round((ts_mas$cumsum/mas_pop)*100000,2)
 ts_mas$incidence14_rate <- round((ts_mas$incident14/mas_pop)*100000,2)
+
+#calculate mortality rate
+ts_mas$mortality_cum<- round((ts_mas$cumsum_death/mas_pop)*100000,2)
+ts_mas$mortality_14d <- round((ts_mas$mortality14/mas_pop)*100000,2)
+
 #add active cases
 ts_mas$active <- ts_mas$cumsum-ts_mas$cumsum_discharged-ts_mas$cumsum_death
 
@@ -372,6 +377,7 @@ perlis_r0_df <- perlis_r0_df %>%
 
 #create a 14-day moving incidence rate
 perlis_r0_df$incident14 <- rollsum(perlis_r0_df$case,k=14,fill=NA, align="right")
+perlis_r0_df$mortality14 <- rollsum(perlis_r0_df$new_death,k=7,fill=NA, align="right")
 
 #average mobility of 5 scores for each state`
 mobility_perlis <- mobility %>% filter (state=="Perlis" & date >as.Date("2020-03-19")) 
@@ -429,7 +435,7 @@ kedah_r0_df <- kedah_r0_df %>%
 
 #create a 14-day moving incidence rate
 kedah_r0_df$incident14 <- rollsum(kedah_r0_df$case,k=14,fill=NA, align="right")
-
+kedah_r0_df$mortality14 <- rollsum(kedah_r0_df$new_death,k=7,fill=NA, align="right")
 #average mobility of 5 scores for each state`
 mobility_kedah <- mobility %>% filter (state=="Kedah" & date >as.Date("2020-03-19")) 
 
@@ -487,6 +493,7 @@ penang_r0_df <- penang_r0_df %>%
 
 #create a 14-day moving incidence rate
 penang_r0_df$incident14 <- rollsum(penang_r0_df$case,k=14,fill=NA, align="right")
+penang_r0_df$mortality14 <- rollsum(penang_r0_df$new_death,k=7,fill=NA, align="right")
 
 #average mobility of 5 scores for each state`
 mobility_penang<- mobility %>% filter (state=="Pulau Pinang" & date >as.Date("2020-03-19")) 
@@ -545,6 +552,7 @@ perak_r0_df <- perak_r0_df %>%
 
 #create a 14-day moving incidence rate
 perak_r0_df$incident14 <- rollsum(perak_r0_df$case,k=14,fill=NA, align="right")
+perak_r0_df$mortality14 <- rollsum(perak_r0_df$new_death,k=7,fill=NA, align="right")
 
 #average mobility of 5 scores for each state`
 mobility_perak<- mobility %>% filter (state=="Perak" & date >as.Date("2020-03-19")) 
@@ -603,6 +611,7 @@ selangor_r0_df <- selangor_r0_df %>%
 
 #create a 14-day moving incidence rate
 selangor_r0_df$incident14 <- rollsum(selangor_r0_df$case,k=14,fill=NA, align="right")
+selangor_r0_df$mortality14 <- rollsum(selangor_r0_df$new_death,k=7,fill=NA, align="right")
 
 #average mobility of 5 scores for each state`
 mobility_selangor<- mobility %>% filter (state=="Selangor" & date >as.Date("2020-03-19")) 
@@ -660,6 +669,7 @@ kl_r0_df <- kl_r0_df %>%
 
 #create a 14-day moving incidence rate
 kl_r0_df$incident14 <- rollsum(kl_r0_df$case,k=14,fill=NA, align="right")
+kl_r0_df$mortality14 <- rollsum(kl_r0_df$new_death,k=7,fill=NA, align="right")
 
 #average mobility of 5 scores for each state`
 mobility_kl<- mobility %>% filter (state=="W.P. Kuala Lumpur" & date >as.Date("2020-03-19")) 
@@ -717,6 +727,7 @@ putrajaya_r0_df <- putrajaya_r0_df %>%
 
 #create a 14-day moving incidence rate
 putrajaya_r0_df$incident14 <- rollsum(putrajaya_r0_df$case,k=14,fill=NA, align="right")
+putrajaya_r0_df$mortality14 <- rollsum(putrajaya_r0_df$new_death,k=7,fill=NA, align="right")
 
 #average mobility of 5 scores for each state`
 mobility_putrajaya<- mobility %>% filter (state=="W.P. Putrajaya" & date >as.Date("2020-03-19")) 
@@ -774,6 +785,7 @@ negeri_r0_df <- negeri_r0_df %>%
 
 #create a 14-day moving incidence rate
 negeri_r0_df$incident14 <- rollsum(negeri_r0_df$case,k=14,fill=NA, align="right")
+negeri_r0_df$mortality14 <- rollsum(negeri_r0_df$new_death,k=7,fill=NA, align="right")
 
 #average mobility of 5 scores for each state`
 mobility_negeri<- mobility %>% filter (state=="Negeri Sembilan" & date >as.Date("2020-03-19")) 
@@ -831,6 +843,7 @@ melaka_r0_df <- melaka_r0_df %>%
 
 #create a 14-day moving incidence rate
 melaka_r0_df$incident14 <- rollsum(melaka_r0_df$case,k=14,fill=NA, align="right")
+melaka_r0_df$mortality14 <- rollsum(melaka_r0_df$new_death,k=7,fill=NA, align="right")
 
 #average mobility of 5 scores for each state`
 mobility_melaka<- mobility %>% filter (state=="Melaka" & date >as.Date("2020-03-19")) 
@@ -890,6 +903,7 @@ johor_r0_df <- johor_r0_df %>%
 
 #create a 14-day moving incidence rate
 johor_r0_df$incident14 <- rollsum(johor_r0_df$case,k=14,fill=NA, align="right")
+johor_r0_df$mortality14 <- rollsum(johor_r0_df$new_death,k=7,fill=NA, align="right")
 
 #average mobility of 5 scores for each state`
 mobility_johor<- mobility %>% filter (state=="Johor" & date >as.Date("2020-03-19")) 
@@ -947,6 +961,7 @@ pahang_r0_df <- pahang_r0_df %>%
 
 #create a 14-day moving incidence rate
 pahang_r0_df$incident14 <- rollsum(pahang_r0_df$case,k=14,fill=NA, align="right")
+pahang_r0_df$mortality14 <- rollsum(pahang_r0_df$new_death,k=7,fill=NA, align="right")
 
 #average mobility of 5 scores for each state`
 mobility_pahang<- mobility %>% filter (state=="Pahang" & date >as.Date("2020-03-19")) 
@@ -1004,6 +1019,7 @@ terengganu_r0_df <- terengganu_r0_df %>%
 
 #create a 14-day moving incidence rate
 terengganu_r0_df$incident14 <- rollsum(terengganu_r0_df$case,k=14,fill=NA, align="right")
+terengganu_r0_df$mortality14 <- rollsum(terengganu_r0_df$new_death,k=7,fill=NA, align="right")
 
 #average mobility of 5 scores for each state`
 mobility_terengganu<- mobility %>% filter (state=="Terengganu" & date >as.Date("2020-03-19")) 
@@ -1061,6 +1077,7 @@ kelantan_r0_df <- kelantan_r0_df %>%
 
 #create a 14-day moving incidence rate
 kelantan_r0_df$incident14 <- rollsum(kelantan_r0_df$case,k=14,fill=NA, align="right")
+kelantan_r0_df$mortality14 <- rollsum(kelantan_r0_df$new_death,k=7,fill=NA, align="right")
 
 #average mobility of 5 scores for each state`
 mobility_kelantan<- mobility %>% filter (state=="Kelantan" & date >as.Date("2020-03-19")) 
@@ -1119,6 +1136,7 @@ sabah_r0_df <- sabah_r0_df %>%
 
 #create a 14-day moving incidence rate
 sabah_r0_df$incident14 <- rollsum(sabah_r0_df$case,k=14,fill=NA, align="right")
+sabah_r0_df$mortality14 <- rollsum(sabah_r0_df$new_death,k=7,fill=NA, align="right")
 
 #average mobility of 5 scores for each state`
 mobility_sabah<- mobility %>% filter (state=="Sabah" & date >as.Date("2020-03-19")) 
@@ -1177,6 +1195,7 @@ sarawak_r0_df <- sarawak_r0_df %>%
 
 #create a 14-day moving incidence rate
 sarawak_r0_df$incident14 <- rollsum(sarawak_r0_df$case,k=14,fill=NA, align="right")
+sarawak_r0_df$mortality14 <- rollsum(sarawak_r0_df$new_death,k=7,fill=NA, align="right")
 
 #average mobility of 5 scores for each state`
 mobility_sarawak<- mobility %>% filter (state=="Sarawak" & date >as.Date("2020-03-19")) 
@@ -1235,6 +1254,7 @@ labuan_r0_df <- labuan_r0_df %>%
 
 #create a 14-day moving incidence rate
 labuan_r0_df$incident14 <- rollsum(labuan_r0_df$case,k=14,fill=NA, align="right")
+labuan_r0_df$mortality14 <- rollsum(labuan_r0_df$new_death,k=7,fill=NA, align="right")
 
 #average mobility of 5 scores for each state`
 mobility_labuan<- mobility %>% filter (state=="W.P. Labuan" & date >as.Date("2020-03-19")) 
@@ -1313,6 +1333,25 @@ kelantan$incidence14_rate <- round((kelantan$incident14 /state_data_v2$populatio
 sabah$incidence14_rate <- round((sabah$incident14 /state_data_v2$population_new[state_data_v2$state=="Sabah"])*100000,2)
 sarawak$incidence14_rate <- round((sarawak$incident14 /state_data_v2$population_new[state_data_v2$state=="Sarawak"])*100000,2)
 labuan$incidence14_rate <- round((labuan$incident14 /state_data_v2$population_new[state_data_v2$state=="W.P. Labuan"])*100000,2)
+
+#add 14-day mortality by states
+perlis$mortality14_rate <- round((perlis$mortality14/state_data_v2$population_new[state_data_v2$state=="Perlis"])*100000,2)
+kedah$mortality14_rate <- round((kedah$mortality14 /state_data_v2$population_new[state_data_v2$state=="Kedah"])*100000,2)
+penang$mortality14_rate <- round((penang$mortality14 /state_data_v2$population_new[state_data_v2$state=="Pulau Pinang"])*100000,2)
+perak$mortality14_rate <- round((perak$mortality14 /state_data_v2$population_new[state_data_v2$state=="Perak"])*100000,2)
+selangor$mortality14_rate <- round((selangor$mortality14 /state_data_v2$population_new[state_data_v2$state=="Selangor"])*100000,2)
+kl$mortality14_rate <- round((kl$mortality14 /state_data_v2$population_new[state_data_v2$state=="W.P. Kuala Lumpur"])*100000,2)
+putrajaya$mortality14_rate <- round((putrajaya$mortality14 /state_data_v2$population_new[state_data_v2$state=="W.P. Putrajaya"])*100000,2)
+melaka$mortality14_rate <- round((melaka$mortality14 /state_data_v2$population_new[state_data_v2$state=="Melaka"])*100000,2)
+negeri$mortality14_rate <- round((negeri$mortality14 /state_data_v2$population_new[state_data_v2$state=="Negeri Sembilan"])*100000,2)
+johor$mortality14_rate <- round((johor$mortality14 /state_data_v2$population_new[state_data_v2$state=="Johor"])*100000,2)
+pahang$mortality14_rate <- round((pahang$mortality14 /state_data_v2$population_new[state_data_v2$state=="Pahang"])*100000,2)
+terengganu$mortality14_rate <- round((terengganu$mortality14 /state_data_v2$population_new[state_data_v2$state=="Terengganu"])*100000,2)
+kelantan$mortality14_rate <- round((kelantan$mortality14 /state_data_v2$population_new[state_data_v2$state=="Kelantan"])*100000,2)
+sabah$mortality14_rate <- round((sabah$mortality14 /state_data_v2$population_new[state_data_v2$state=="Sabah"])*100000,2)
+sarawak$mortality14_rate <- round((sarawak$mortality14 /state_data_v2$population_new[state_data_v2$state=="Sarawak"])*100000,2)
+labuan$mortality14_rate <- round((labuan$mortality14 /state_data_v2$population_new[state_data_v2$state=="W.P. Labuan"])*100000,2)
+
 
 #add in a column for hospitals and icu beds
 perlis$hbed <- state_data_v2$estimated_covid19_beds[state_data_v2$state=="Perlis"]
@@ -2623,29 +2662,28 @@ ggplotly(labuan_epid_curve)%>% layout(
 
 Cumulative Incidence and 14-Day Incidence density {data-orientation=cols} 
 =====================================
-    
 Cols {.tabset}
 -------------------------------------
-### Cumulative incidence
+### 14 day incidence density
 ```{r}
 mas_inc_curve <- plot_ly() %>%
-  add_lines(data=incidence_df %>% filter(group=="state"), x=~date,y = ~incidence, name=~state, color=~state,
+  add_lines(data=incidence_df %>% filter(group=="state"), x=~date,y = ~incidence14/2, name=~state, color=~state,
             colors=c("#0000FF", "#63B8FF", "#006400", "#008B45", "#54FF9F", "#C71585", "#EEC900", "#FF8C00", "#68228B", "#FFAEB9", "#CD2626", "#008B8B", "#ADD8E6",
                       "#F08080", "#696969", "#2B2B2B", "#FF1493"))%>%
-  add_lines(data=incidence_df %>% filter(group=="region"), x=~date,y = ~incidence2, name=~location, color=~location, 
+  add_lines(data=incidence_df %>% filter(group=="region"), x=~date,y = ~incidence14_2/2, name=~location, color=~location, 
             colors=c("#CD2626", "#008B45", "#63B8FF", "#2B2B2B", "#FFAEB9", "#EEC900"), visible=FALSE)%>% 
-  layout(title = paste0("Cumulative Incidence of COVID-19 cases",
+  layout(title = paste0("7-day incidence density of COVID-19 cases",
                  '<br>',
                  '<i>',
                  'Malaysia: National and State Level',
                  '</i>'),
   xaxis = list(title = "Date", domain = c(0, 1)),
-  yaxis = list(title = paste0("Cumulative Incidence density",
+  yaxis = list(title = paste0("Incidence density",
                               '<br>',
                               "(per 100,000 population)")),
   updatemenus = list(
     list(
-      y = 0.4, x=1.1,
+       y = 0.4, x=1.1,
       buttons = list(
         list(method = "restyle",
              args = list("visible", list(TRUE, TRUE, TRUE, TRUE,TRUE, TRUE, TRUE, TRUE,TRUE, TRUE, TRUE, TRUE,TRUE, TRUE, TRUE, TRUE,
@@ -2667,8 +2705,8 @@ mas_inc_curve <- plot_ly() %>%
            sizey = 0.2,
            opacity = 1.1
       )))  %>%
-  layout(yaxis = list(type = "log", range=c(0.5,4),
-                      tickvals = as.list(c(10,100,1000)))) %>% 
+  layout(yaxis = list(type = "log",  
+                      tickvals = as.list(c(0.1,1,10,50,100,150,1000)))) %>% 
   layout(titlefont=list(size=12)) %>%
   config(modeBarButtonsToRemove = c("zoomIn2d", "zoomOut2d", "autoScale2d", "resetScale2d", "hoverClosestCartesian", "hoverCompareCartesian","lasso2d", "select2d", "pan2d","zoom2d")) %>%
   layout(xaxis=list(fixedrange=TRUE)) %>% layout(yaxis=list(fixedrange=TRUE)) %>%
@@ -2680,20 +2718,19 @@ mas_inc_curve <- plot_ly() %>%
          xaxis = list(title="Date",
                       range = 
             c(as.numeric(as.POSIXct((Sys.Date()-91), format="%Y-%m-%d"))*1000,
-              as.numeric(as.POSIXct(Sys.Date(), format="%Y-%m-%d"))*1000)))
+              as.numeric(as.POSIXct(Sys.Date(), format="%Y-%m-%d"))*1000))) 
 mas_inc_curve
 ```
 
-
-### 14 day incidence density
+### Cumulative incidence
 ```{r}
 mas_inc_curve <- plot_ly() %>%
-  add_lines(data=incidence_df %>% filter(group=="state"), x=~date,y = ~incidence14, name=~state, color=~state,
+  add_lines(data=incidence_df %>% filter(group=="state"), x=~date,y = ~incidence, name=~state, color=~state,
             colors=c("#0000FF", "#63B8FF", "#006400", "#008B45", "#54FF9F", "#C71585", "#EEC900", "#FF8C00", "#68228B", "#FFAEB9", "#CD2626", "#008B8B", "#ADD8E6",
                       "#F08080", "#696969", "#2B2B2B", "#FF1493"))%>%
   add_lines(data=incidence_df %>% filter(group=="region"), x=~date,y = ~incidence14_2, name=~location, color=~location, 
             colors=c("#CD2626", "#008B45", "#63B8FF", "#2B2B2B", "#FFAEB9", "#EEC900"), visible=FALSE)%>% 
-  layout(title = paste0("14-day incidence density of COVID-19 cases",
+  layout(title = paste0("Cumulative incidence of COVID-19 cases",
                  '<br>',
                  '<i>',
                  'Malaysia: National and State Level',
@@ -2743,6 +2780,54 @@ mas_inc_curve <- plot_ly() %>%
 mas_inc_curve
 ```
 
+### 7-day Mortality rate
+```{r}
+mas_state <- mas_state %>%
+  mutate(mortality14_rate = rollmean(mortality14_rate, k = 7, fill = "extend"))
+
+mas_death_curve <- plot_ly() %>%
+  add_lines(data=mas_state, x=~date,y = ~mortality14_rate, name=~state, color=~state,
+            colors=c("#0000FF", "#63B8FF", "#006400", "#008B45", "#54FF9F", "#C71585", "#EEC900", "#FF8C00", "#68228B", "#FFAEB9", "#CD2626", "#008B8B", "#ADD8E6",
+                      "#F08080", "#696969", "#2B2B2B", "#FF1493")) %>%
+  layout(title = paste0("7-day COVID-19 Mortality rate",
+                 '<br>',
+                 '<i>',
+                 'Malaysia: National and State Level',
+                 '</i>'),
+  xaxis = list(title = "Date", domain = c(0, 1)),
+  yaxis = list(title = paste0("7-day Mortality rate",
+                              '<br>',
+                              "(per 100,000 population)"))) %>% 
+  layout(
+    images = list(
+      list(source = base64enc::dataURI(file = "Picture1.png"),
+           xref = "paper",
+           yref = "paper",
+           x= -0.03,
+           y= 1.04,
+           sizex = 0.2,
+           sizey = 0.2,
+           opacity = 1.1
+      )))  %>%
+  layout(titlefont=list(size=12)) %>%
+  config(modeBarButtonsToRemove = c("zoomIn2d", "zoomOut2d", "autoScale2d", "resetScale2d", "hoverClosestCartesian", "hoverCompareCartesian","lasso2d", "select2d", "pan2d","zoom2d")) %>%
+  layout(xaxis=list(fixedrange=TRUE)) %>% layout(yaxis=list(fixedrange=TRUE))%>%
+  config(displaylogo = FALSE)  %>%
+    layout(
+        xaxis = list(titlefont = list(size = 12)), 
+        yaxis = list(titlefont = list(size = 8)))  %>%
+  layout(titlefont=list(size=12),
+         xaxis = list(title="Date",
+                      range = 
+            c(as.numeric(as.POSIXct((Sys.Date()-91), format="%Y-%m-%d"))*1000,
+              as.numeric(as.POSIXct(Sys.Date(), format="%Y-%m-%d"))*1000)),
+          yaxis = list(title=paste0("7-day Mortality rate",
+                              '<br>',
+                              "(per 100,000 population)"),
+                      range = 
+            c(0.1,20))) 
+mas_death_curve
+```
 
 Health System Capacity {data-orientation=rows} 
 =====================================
