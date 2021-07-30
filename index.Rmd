@@ -2664,7 +2664,7 @@ Cumulative Incidence and 14-Day Incidence density {data-orientation=cols}
 =====================================
 Cols {.tabset}
 -------------------------------------
-### 14 day incidence density
+### 7-day incidence density
 ```{r}
 mas_inc_curve <- plot_ly() %>%
   add_lines(data=incidence_df %>% filter(group=="state"), x=~date,y = ~incidence14/2, name=~state, color=~state,
