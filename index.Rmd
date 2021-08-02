@@ -1437,7 +1437,7 @@ state_full <- rbind(perlis, kedah, penang, perak,selangor,
 mas_state <- full_join(ts_mas, state_full, by=c("state","date","incidence","incidence14_rate","bed_perc5"))
 
 mas_state <- mas_state%>% filter(date>as.Date("2020-03-19"))
-#write.csv(mas_state, "mas.csv")
+write.csv(mas_state, "mas.csv")
 ```
 
 
