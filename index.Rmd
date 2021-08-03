@@ -6310,9 +6310,17 @@ tr_states
 ```
 
 ```{r}
+#load voc data
+voc_v4 <- read_excel("P:/COVID-19/R0 Malaysia/data/voc/voc_v4.xlsx", 
+    sheet = "states", col_types = c("date", 
+        "text", "numeric", "text", "text", 
+        "text", "text", "text", "text"))
+voc_states <- voc_v4 %>% dplyr::select(date, state, cases, variant, status, data)
+
 #write to data tests and cases
 write.csv(core_set, "P:/COVID-19/covid-19-epi/data/cases.csv")
 write.csv(test, "P:/COVID-19/covid-19-epi/data/tests.csv")
+write.csv(voc_states, "P:/COVID-19/covid-19-epi/data/voc_states.csv")
 ```
 
 
