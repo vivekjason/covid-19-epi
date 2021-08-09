@@ -204,7 +204,7 @@ ts_mas$incidence14_rate <- round((ts_mas$incident14/mas_pop)*100000,2)
 
 #calculate mortality rate
 ts_mas$mortality_cum<- round((ts_mas$cumsum_death/mas_pop)*100000,2)
-ts_mas$mortality_14d <- round((ts_mas$mortality14/mas_pop)*100000,2)
+ts_mas$mortality14_rate <- round((ts_mas$mortality14/mas_pop)*100000,2)
 
 #add active cases
 ts_mas$active <- ts_mas$cumsum-ts_mas$cumsum_discharged-ts_mas$cumsum_death
@@ -272,7 +272,7 @@ write.csv(vax_malaysia, "P:/COVID-19/R0 Malaysia/data/vaccination/vax_malaysia.c
 write.csv(vaxreg_malaysia, "P:/COVID-19/R0 Malaysia/data/vaccination/vaxreg_malaysia.csv")
 write.csv(vaxreg_state, "P:/COVID-19/R0 Malaysia/data/vaccination/vaxreg_state.csv")
 
-
+#write.csv(ts_mas, "P:/IPPC/Epid Report/mas.csv")
 ```
 
 
@@ -1434,10 +1434,10 @@ state_full <- rbind(perlis, kedah, penang, perak,selangor,
                        sarawak, labuan)
 
 
-mas_state <- full_join(ts_mas, state_full, by=c("state","date","incidence","incidence14_rate","bed_perc5"))
+mas_state <- left_join(ts_mas, state_full, by=c("state","date","incidence","incidence14_rate","mortality14_rate","bed_perc5"))
 
 mas_state <- mas_state%>% filter(date>as.Date("2020-03-19"))
-#write.csv(mas_state, "mas.csv")
+#write.csv(state_full, "P:/IPPC/Epid Report/state.csv")
 ```
 
 
@@ -2782,11 +2782,12 @@ mas_inc_curve
 
 ### 7-day Mortality rate
 ```{r}
-mas_state <- mas_state %>%
+state_full <- state_full %>% group_by(state) %>%
+  fill(mortality14_rate) %>%
   mutate(mortality14_rate = rollmean(mortality14_rate, k = 7, fill = "extend"))
 
 mas_death_curve <- plot_ly() %>%
-  add_lines(data=mas_state, x=~date,y = ~mortality14_rate, name=~state, color=~state,
+  add_lines(data=state_full, x=~date,y = ~mortality14_rate, name=~state, color=~state,
             colors=c("#0000FF", "#63B8FF", "#006400", "#008B45", "#54FF9F", "#C71585", "#EEC900", "#FF8C00", "#68228B", "#FFAEB9", "#CD2626", "#008B8B", "#ADD8E6",
                       "#F08080", "#696969", "#2B2B2B", "#FF1493")) %>%
   layout(title = paste0("7-day COVID-19 Mortality rate",
