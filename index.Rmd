@@ -52,7 +52,7 @@ library(rgdal)
 #unlink('index_cache', recursive = TRUE)
 #rm(list=ls())
 #pull data set of clusters
-clusters <- read_csv("P:/COVID-19/R0 Malaysia/data/cluster data/clusters_dashboard_v2.csv", 
+clusters <- read_csv("P:/COVID-19/R0 Malaysia/data/cluster data/clusters_dashboard_v3.csv", 
     col_types = cols(no = col_number(), bangau = col_number(), 
         benteng = col_number(), benteng_pk = col_number(), 
         date = col_date(format = "%d/%m/%Y"), 
@@ -83,7 +83,7 @@ clusters <- read_csv("P:/COVID-19/R0 Malaysia/data/cluster data/clusters_dashboa
 
 
 #pull new data set
-df <- read_csv("P:/COVID-19/R0 Malaysia/data/incidence/covid-19_my_v3.csv", 
+df <- read_csv("P:/COVID-19/R0 Malaysia/data/incidence/covid-19_my_v4.csv", 
       col_types = cols(date = col_date(format = "%d/%m/%Y"), 
         new_cases = col_number(), new_deaths = col_number(), 
         total_cases = col_number(), total_deaths = col_number(), 
@@ -272,7 +272,7 @@ write.csv(vax_malaysia, "P:/COVID-19/R0 Malaysia/data/vaccination/vax_malaysia.c
 write.csv(vaxreg_malaysia, "P:/COVID-19/R0 Malaysia/data/vaccination/vaxreg_malaysia.csv")
 write.csv(vaxreg_state, "P:/COVID-19/R0 Malaysia/data/vaccination/vaxreg_state.csv")
 
-write.csv(ts_mas, "P:/IPPC/Epid Report/mas.csv")
+#write.csv(ts_mas, "P:/IPPC/Epid Report/mas.csv")
 ```
 
 
@@ -280,7 +280,7 @@ write.csv(ts_mas, "P:/IPPC/Epid Report/mas.csv")
 ```{r, include=FALSE}
 #get the data for states in
 #load Malaysian data by state from data.world
-df <- read_csv("P:/COVID-19/R0 Malaysia/data/incidence/covid-19_my_state_v4.csv", 
+df <- read_csv("P:/COVID-19/R0 Malaysia/data/incidence/covid-19_my_state_v5.csv", 
         col_types = cols(date = col_date(format = "%d/%m/%Y"), 
         new_cases = col_number(), total_cases = col_number(), 
         new_deaths = col_number(), total_deaths = col_number()))
@@ -1437,7 +1437,7 @@ state_full <- rbind(perlis, kedah, penang, perak,selangor,
 mas_state <- left_join(ts_mas, state_full, by=c("state","date","incidence","incidence14_rate","mortality14_rate","bed_perc5"))
 
 mas_state <- mas_state%>% filter(date>as.Date("2020-03-19"))
-write.csv(state_full, "P:/IPPC/Epid Report/state.csv")
+#write.csv(state_full, "P:/IPPC/Epid Report/state.csv")
 ```
 
 
