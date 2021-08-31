@@ -5945,7 +5945,7 @@ mas_test_curve <- plot_ly() %>%
          yaxis = list(tickfont= list(color = 'grey9', size=8), color='grey9', range=c(0,max(test_mas$cases)*1.15),
                       title="Daily new cases (count)"),
          yaxis2 = list(overlaying = "y", side = "right",
-                       tickfont = list(color = 'grey9', size=8), color='grey9', range=c(0,15),
+                       tickfont = list(color = 'grey9', size=8), color='grey9', range=c(0,20),
                        title = paste0("Test Positivity",
                                     '<br>', "rate (%)"),
          legend = list(x = 1.05, y = 0.9))) %>%
@@ -6026,7 +6026,7 @@ mas_test_curve <- plot_ly() %>%
          yaxis = list(tickfont= list(color = 'grey9', size=8), color='grey9', range=c(0,max(test_mas$new_cases)*1.15),
                       title="Daily new cases (count)"),
          yaxis2 = list(overlaying = "y", side = "right",
-                       tickfont = list(color = 'grey9', size=8), color='grey9', range=c(0,5),
+                       tickfont = list(color = 'grey9', size=8), color='grey9', range=c(0,7.5),
                        title = paste0("Testing rate",
                                     '<br>', "(per 1000 population)"),
          legend = list(x = 1.05, y = 0.9)))
