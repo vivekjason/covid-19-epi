@@ -94,8 +94,8 @@ df <- read_csv("P:/COVID-19/R0 Malaysia/data/incidence/covid-19_my_v7.csv",
 core_set <- df
 
 #cut out the dates to join with cluster
-new <- df[21:as.numeric(Sys.Date()-18261),c(1,3,4,7)] # TODO: if elapsed by a day +1 to the constant (contstant=18260) (+1 for each elapsed day)
-new$no <- seq(1:as.numeric(Sys.Date()-18281)) # TODO: if elapsed by a day +1 to the constant (contstant=18280)  (+1 for each elapsed day)
+new <- df[21:as.numeric(Sys.Date()-18260),c(1,3,4,7)] # TODO: if elapsed by a day +1 to the constant (contstant=18260) (+1 for each elapsed day)
+new$no <- seq(1:as.numeric(Sys.Date()-18280)) # TODO: if elapsed by a day +1 to the constant (contstant=18280)  (+1 for each elapsed day)
 new$date <- as.Date(new$date)
 
 #merge the two sets
@@ -272,7 +272,7 @@ write.csv(vax_malaysia, "P:/COVID-19/R0 Malaysia/data/vaccination/vax_malaysia.c
 write.csv(vaxreg_malaysia, "P:/COVID-19/R0 Malaysia/data/vaccination/vaxreg_malaysia.csv")
 write.csv(vaxreg_state, "P:/COVID-19/R0 Malaysia/data/vaccination/vaxreg_state.csv")
 
-#write.csv(ts_mas, "P:/IPPC/Epid Report/mas.csv")
+write.csv(ts_mas, "P:/IPPC/Epid Report/mas.csv")
 ```
 
 
@@ -345,7 +345,7 @@ perlis_r0 <- estimate_R(perlis$new_cases,
 #create df of parameters
 plot(perlis_r0)
 perlis_r0_df<- as.data.frame(perlis_r0$R[,c(1:3,5,11)])
-perlis_r0_df$date <- seq(from=as.Date("2020-03-20"),to=as.Date(Sys.Date()-1),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
+perlis_r0_df$date <- seq(from=as.Date("2020-03-20"),to=as.Date(Sys.Date()),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
 perlis_r0_df <- perlis_r0_df[,3:6]
 perlis_r0_df$state <- "Perlis"
 colnames(perlis_r0_df) <- c("rt","lower","upper","date","state")
@@ -403,7 +403,7 @@ kedah_r0 <- estimate_R(kedah$new_cases,
 #create df of parameters
 plot(kedah_r0)
 kedah_r0_df<- as.data.frame(kedah_r0$R[,c(1:3,5,11)])
-kedah_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()-1),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
+kedah_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
 kedah_r0_df <- kedah_r0_df[,3:6]
 kedah_r0_df$state <- "Kedah"
 colnames(kedah_r0_df) <- c("rt","lower","upper","date","state")
@@ -461,7 +461,7 @@ penang_r0 <- estimate_R(penang$new_cases,
 #create df of parameters
 plot(penang_r0)
 penang_r0_df<- as.data.frame(penang_r0$R[,c(1:3,5,11)])
-penang_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()-1),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
+penang_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
 penang_r0_df <- penang_r0_df[,3:6]
 penang_r0_df$state <- "Pulau Pinang"
 colnames(penang_r0_df) <- c("rt","lower","upper","date","state")
@@ -520,7 +520,7 @@ perak_r0 <- estimate_R(perak$new_cases,
 #create df of parameters
 plot(perak_r0)
 perak_r0_df<- as.data.frame(perak_r0$R[,c(1:3,5,11)])
-perak_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()-1),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
+perak_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
 perak_r0_df <- perak_r0_df[,3:6]
 perak_r0_df$state <- "Perak"
 colnames(perak_r0_df) <- c("rt","lower","upper","date","state")
@@ -579,7 +579,7 @@ selangor_r0 <- estimate_R(selangor$new_cases,
 #create df of parameters
 plot(selangor_r0)
 selangor_r0_df<- as.data.frame(selangor_r0$R[,c(1:3,5,11)])
-selangor_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()-1),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)  
+selangor_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)  
 selangor_r0_df <- selangor_r0_df[,3:6]
 selangor_r0_df$state <- "Selangor"
 colnames(selangor_r0_df) <- c("rt","lower","upper","date","state")
@@ -637,7 +637,7 @@ kl_r0 <- estimate_R(kl$new_cases,
 #create df of parameters
 plot(kl_r0)
 kl_r0_df<- as.data.frame(kl_r0$R[,c(1:3,5,11)])
-kl_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()-1),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
+kl_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
 kl_r0_df <- kl_r0_df[,3:6]
 kl_r0_df$state <- "W.P. Kuala Lumpur"
 colnames(kl_r0_df) <- c("rt","lower","upper","date","state")
@@ -695,7 +695,7 @@ putrajaya_r0 <- estimate_R(putrajaya$new_cases,
 #create df of parameters
 plot(putrajaya_r0)
 putrajaya_r0_df<- as.data.frame(putrajaya_r0$R[,c(1:3,5,11)])
-putrajaya_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()-1),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
+putrajaya_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
 putrajaya_r0_df <- putrajaya_r0_df[,3:6]
 putrajaya_r0_df$state <- "W.P. Putrajaya"
 colnames(putrajaya_r0_df) <- c("rt","lower","upper","date","state")
@@ -753,7 +753,7 @@ negeri_r0 <- estimate_R(negeri$new_cases,
 #create df of parameters
 plot(negeri_r0)
 negeri_r0_df<- as.data.frame(negeri_r0$R[,c(1:3,5,11)])
-negeri_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()-1),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
+negeri_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
 negeri_r0_df <- negeri_r0_df[,3:6]
 negeri_r0_df$state <- "Negeri Sembilan"
 colnames(negeri_r0_df) <- c("rt","lower","upper","date","state")
@@ -811,7 +811,7 @@ melaka_r0 <- estimate_R(melaka$new_cases,
 #create df of parameters
 plot(melaka_r0)
 melaka_r0_df<- as.data.frame(melaka_r0$R[,c(1:3,5,11)])
-melaka_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()-1),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
+melaka_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
 melaka_r0_df <- melaka_r0_df[,3:6]
 melaka_r0_df$state <- "Melaka"
 colnames(melaka_r0_df) <- c("rt","lower","upper","date","state")
@@ -870,7 +870,7 @@ johor_r0 <- estimate_R(johor$new_cases,
 #create df of parameters
 plot(johor_r0)
 johor_r0_df<- as.data.frame(johor_r0$R[,c(1:3,5,11)])
-johor_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()-1),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day) 
+johor_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day) 
 johor_r0_df <- johor_r0_df[,3:6]
 johor_r0_df$state <- "Johor"
 colnames(johor_r0_df) <- c("rt","lower","upper","date","state")
@@ -929,7 +929,7 @@ pahang_r0 <- estimate_R(pahang$new_cases,
 #create df of parameters
 plot(pahang_r0)
 pahang_r0_df<- as.data.frame(pahang_r0$R[,c(1:3,5,11)])
-pahang_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()-1),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
+pahang_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
 pahang_r0_df <- pahang_r0_df[,3:6]
 pahang_r0_df$state <- "Pahang"
 colnames(pahang_r0_df) <- c("rt","lower","upper","date","state")
@@ -987,7 +987,7 @@ terengganu_r0 <- estimate_R(terengganu$new_cases,
 #create df of parameters
 plot(terengganu_r0)
 terengganu_r0_df<- as.data.frame(terengganu_r0$R[,c(1:3,5,11)])
-terengganu_r0_df$date <- seq(from=as.Date("2020-03-20"),to=as.Date(Sys.Date()-1),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
+terengganu_r0_df$date <- seq(from=as.Date("2020-03-20"),to=as.Date(Sys.Date()),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
 terengganu_r0_df <- terengganu_r0_df[,3:6]
 terengganu_r0_df$state <- "Terengganu"
 colnames(terengganu_r0_df) <- c("rt","lower","upper","date","state")
@@ -1045,7 +1045,7 @@ kelantan_r0 <- estimate_R(kelantan$new_cases,
 #create df of parameters
 plot(kelantan_r0)
 kelantan_r0_df<- as.data.frame(kelantan_r0$R[,c(1:3,5,11)])
-kelantan_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()-1),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
+kelantan_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
 kelantan_r0_df <- kelantan_r0_df[,3:6]
 kelantan_r0_df$state <- "Kelantan"
 colnames(kelantan_r0_df) <- c("rt","lower","upper","date","state")
@@ -1103,7 +1103,7 @@ sabah_r0 <- estimate_R(sabah$new_cases,
 #create df of parameters
 plot(sabah_r0)
 sabah_r0_df<- as.data.frame(sabah_r0$R[,c(1:3,5,11)])
-sabah_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()-1),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
+sabah_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
 sabah_r0_df <- sabah_r0_df[,3:6]
 sabah_r0_df$state <- "Sabah"
 colnames(sabah_r0_df) <- c("rt","lower","upper","date","state")
@@ -1163,7 +1163,7 @@ sarawak_r0 <- estimate_R(sarawak$new_cases,
 #create df of parameters
 plot(sarawak_r0)
 sarawak_r0_df<- as.data.frame(sarawak_r0$R[,c(1:3,5,11)])
-sarawak_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()-1),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
+sarawak_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day)
 sarawak_r0_df <- sarawak_r0_df[,3:6]
 sarawak_r0_df$state <- "Sarawak"
 colnames(sarawak_r0_df) <- c("rt","lower","upper","date","state")
@@ -1221,7 +1221,7 @@ labuan_r0 <- estimate_R(labuan$new_cases,
 #create df of parameters
 plot(labuan_r0)
 labuan_r0_df<- as.data.frame(labuan_r0$R[,c(1:3,5,11)])
-labuan_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()-1),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day) 
+labuan_r0_df$date <- seq(from=as.Date("2020-03-20"), to=as.Date(Sys.Date()),by=1) # TODO: if elapsed by a day -1 from the date (-1 for each elapsed day) 
 labuan_r0_df <- labuan_r0_df[,3:6]
 labuan_r0_df$state <- "W.P. Labuan"
 colnames(labuan_r0_df) <- c("rt","lower","upper","date","state")
@@ -1437,7 +1437,7 @@ state_full <- rbind(perlis, kedah, penang, perak,selangor,
 mas_state <- left_join(ts_mas, state_full, by=c("state","date","incidence","incidence14_rate","mortality14_rate","bed_perc5"))
 
 mas_state <- mas_state%>% filter(date>as.Date("2020-03-19"))
-#write.csv(state_full, "P:/IPPC/Epid Report/state.csv")
+write.csv(state_full, "P:/IPPC/Epid Report/state.csv")
 ```
 
 
