@@ -83,7 +83,7 @@ clusters <- read_csv("P:/COVID-19/R0 Malaysia/data/cluster data/clusters_dashboa
 
 
 #pull new data set
-df <- read_csv("P:/COVID-19/R0 Malaysia/data/incidence/covid-19_my_v7.csv", 
+df <- read_csv("P:/COVID-19/R0 Malaysia/data/incidence/covid-19_my_v8.csv", 
       col_types = cols(date = col_date(format = "%d/%m/%Y"), 
         new_cases = col_number(), new_deaths = col_number(), 
         total_cases = col_number(), total_deaths = col_number(), 
