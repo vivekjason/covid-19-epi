@@ -257,6 +257,7 @@ names(ts_mas)[names(ts_mas)=="transit_stations_percent_change_from_baseline"]="t
 names(ts_mas)[names(ts_mas)=="workplaces_percent_change_from_baseline"]="work"
 names(ts_mas)[names(ts_mas)=="residential_percent_change_from_baseline"]="residence"
 
+
 #index the mobility report
 write.csv(Global_Mobility_Report_3_, paste0("P:/COVID-19/R0 Malaysia/data/mobility/Global_Mobility_Report_3_",as.character(format(Sys.Date(), "%y%m%d")), ",csv"))
 
