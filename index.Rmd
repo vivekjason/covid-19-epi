@@ -282,7 +282,8 @@ write.csv(vaxreg_state, "P:/COVID-19/R0 Malaysia/data/vaccination/vaxreg_state.c
 #get the data for states in
 #load Malaysian data by state from data.world
 df <- read_csv("P:/COVID-19/R0 Malaysia/data/incidence/covid-19_my_state_v5.csv", 
-        col_types = cols(date = col_date(format = "%d/%m/%Y"), 
+               col_types = cols(date = col_date(format = "%d/%m/%Y"), 
+                                
         new_cases = col_number(), total_cases = col_number(), 
         new_deaths = col_number(), total_deaths = col_number()))
 state <- df
