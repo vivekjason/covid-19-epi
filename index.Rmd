@@ -273,7 +273,7 @@ write.csv(vax_malaysia, "P:/COVID-19/R0 Malaysia/data/vaccination/vax_malaysia.c
 write.csv(vaxreg_malaysia, "P:/COVID-19/R0 Malaysia/data/vaccination/vaxreg_malaysia.csv")
 write.csv(vaxreg_state, "P:/COVID-19/R0 Malaysia/data/vaccination/vaxreg_state.csv")
 
-#write.csv(ts_mas, "P:/IPPC/Epid Report/mas.csv")
+write.csv(ts_mas, "P:/IPPC/Epid Report/mas.csv")
 ```
 
 
@@ -1439,7 +1439,7 @@ state_full <- rbind(perlis, kedah, penang, perak,selangor,
 mas_state <- left_join(ts_mas, state_full, by=c("state","date","incidence","incidence14_rate","mortality14_rate","bed_perc5"))
 
 mas_state <- mas_state%>% filter(date>as.Date("2020-03-19"))
-#write.csv(state_full, "P:/IPPC/Epid Report/state.csv")
+write.csv(state_full, "P:/IPPC/Epid Report/state.csv")
 ```
 
 
