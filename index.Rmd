@@ -6353,3 +6353,4 @@ Data sources, extraction and methods utilised in the development of the dashboar
 ***Feedback***
 
 We believe in continuous improvement and would as such love to hear from you on ways we can improve- be it in the usability of the dashboard or the problems with the content. Additionally if you wish to request for our data or source code please do also drop us a line. You can reach out to us using the attached [Feedback form](https://spm.um.edu.my/covid19-epid-live-feedback/) 
+
